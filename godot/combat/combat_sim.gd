@@ -12,6 +12,9 @@ const CRIT_MULT: float = 1.5
 const MATCH_TIMEOUT_TICKS: int = 90 * 10
 const OVERTIME_TICKS: int = 60 * 10  # 600 ticks = 60s — triggers overtime aggression
 const OVERTIME_SPEED_MULT: float = 1.2  # +20% movement speed in overtime
+const OVERTIME_DAMAGE_MULT: float = 1.5  # 50% damage amp during overtime (60s+)
+const SUDDEN_DEATH_TICKS: int = 75 * 10  # 750 ticks = 75s — sudden death escalation
+const SUDDEN_DEATH_DAMAGE_MULT: float = 2.0  # 100% damage amp during sudden death (75s+)
 const BOT_HITBOX_RADIUS: float = 12.0
 const TILE_SIZE: float = 32.0
 
@@ -22,6 +25,7 @@ var tick_count: int = 0
 var match_over: bool = false
 var winner_team: int = -1
 var overtime_active: bool = false
+var sudden_death_active: bool = false
 
 signal on_damage(target: BrottState, amount: float, is_crit: bool, pos: Vector2)
 signal on_projectile_spawned(proj: Projectile)
@@ -48,6 +52,10 @@ func simulate_tick() -> void:
 			if b.alive:
 				b.stance = 0  # Force Aggressive
 				b.overtime = true
+	
+	# Check sudden death escalation
+	if not sudden_death_active and tick_count >= SUDDEN_DEATH_TICKS:
+		sudden_death_active = true
 
 	for b in brotts:
 		if not b.alive:
@@ -404,7 +412,12 @@ func _update_projectiles() -> void:
 func _apply_damage(target: BrottState, base_dmg: float, is_crit: bool, source: BrottState, hit_pos: Vector2) -> void:
 	var reduction: float = target.get_armor_reduction()
 	var crit_mult: float = CRIT_MULT if is_crit else 1.0
-	var effective: float = base_dmg * (1.0 - reduction) * crit_mult
+	var overtime_mult: float = 1.0
+	if sudden_death_active:
+		overtime_mult = SUDDEN_DEATH_DAMAGE_MULT
+	elif overtime_active:
+		overtime_mult = OVERTIME_DAMAGE_MULT
+	var effective: float = base_dmg * (1.0 - reduction) * crit_mult * overtime_mult
 	effective = maxf(effective, 1.0)
 	
 	if target.shield_active and target.shield_hp > 0:

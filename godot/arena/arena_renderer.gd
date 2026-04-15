@@ -51,6 +51,10 @@ var overtime_flash_timer: float = 0.0
 var overtime_banner_alpha: float = 0.0
 var overtime_triggered: bool = false
 
+# Sudden death visual state
+var sudden_death_flash_timer: float = 0.0
+var sudden_death_triggered: bool = false
+
 # Hit flash tracking (max 1 flash per 3 frames)
 var last_flash_frame: Dictionary = {}  # brott -> last flash frame
 var frame_count: int = 0
@@ -370,6 +374,13 @@ func tick_visuals() -> void:
 		overtime_flash_timer -= 1.0
 	if overtime_triggered:
 		overtime_banner_alpha = maxf(0.4, overtime_banner_alpha - 0.01)  # fade to persistent 0.4
+	
+	# Update sudden death banner
+	if sim.sudden_death_active and not sudden_death_triggered:
+		sudden_death_triggered = true
+		sudden_death_flash_timer = 90.0  # 1.5 sec flash
+	if sudden_death_flash_timer > 0:
+		sudden_death_flash_timer -= 1.0
 
 	# Update brott visual state
 	for b: BrottState in sim.brotts:
@@ -454,9 +465,16 @@ func _draw() -> void:
 	if sim.match_over:
 		_draw_match_result(draw_offset)
 	
-	# Overtime banner
-	if overtime_triggered:
+	# Overtime / Sudden Death banner
+	if sudden_death_triggered:
+		_draw_sudden_death_banner(draw_offset)
+	elif overtime_triggered:
 		_draw_overtime_banner(draw_offset)
+	
+	# Sudden death red flash
+	if sudden_death_flash_timer > 0:
+		var flash_alpha := clampf(sudden_death_flash_timer / 90.0 * 0.4, 0.0, 0.4)
+		draw_rect(Rect2(Vector2.ZERO, Vector2(1280, 720)), Color(1, 0, 0, flash_alpha))
 
 func _draw_brott(b: BrottState, draw_offset: Vector2) -> void:
 	var pos: Vector2 = b.position + draw_offset
@@ -547,3 +565,13 @@ func _draw_overtime_banner(draw_offset: Vector2) -> void:
 	for off in [Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1), Vector2(0, 1)]:
 		draw_string(ThemeDB.fallback_font, center - Vector2(60, 0) + off, "OVERTIME!", HORIZONTAL_ALIGNMENT_CENTER, 120, 20, outline_col)
 	draw_string(ThemeDB.fallback_font, center - Vector2(60, 0), "OVERTIME!", HORIZONTAL_ALIGNMENT_CENTER, 120, 20, col)
+
+func _draw_sudden_death_banner(draw_offset: Vector2) -> void:
+	var center: Vector2 = draw_offset + Vector2(ARENA_PX / 2.0, 40.0)
+	# Pulsing red text
+	var pulse: float = sin(float(frame_count) * 0.15) * 0.3 + 0.7
+	var col := Color(1.0, 0.1, 0.1, pulse)
+	var outline_col := Color(0, 0, 0, pulse * 0.9)
+	for off in [Vector2(-1, 0), Vector2(1, 0), Vector2(0, -1), Vector2(0, 1)]:
+		draw_string(ThemeDB.fallback_font, center - Vector2(80, 0) + off, "SUDDEN DEATH!", HORIZONTAL_ALIGNMENT_CENTER, 160, 24, outline_col)
+	draw_string(ThemeDB.fallback_font, center - Vector2(80, 0), "SUDDEN DEATH!", HORIZONTAL_ALIGNMENT_CENTER, 160, 24, col)

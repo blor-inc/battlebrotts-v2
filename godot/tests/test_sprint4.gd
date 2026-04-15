@@ -57,6 +57,15 @@ func _init() -> void:
 	_test_overtime_speed_boost()
 	_test_no_overtime_before_60s()
 	
+	# --- OVERTIME DAMAGE AMP TESTS ---
+	_test_overtime_damage_mult_constant()
+	_test_sudden_death_ticks_constant()
+	_test_sudden_death_damage_mult_constant()
+	_test_overtime_damage_amp_applied()
+	_test_sudden_death_triggers_at_75s()
+	_test_sudden_death_damage_amp_applied()
+	_test_no_damage_amp_before_overtime()
+	
 	print("\n=== Results: %d passed, %d failed, %d total ===" % [pass_count, fail_count, test_count])
 	
 	if fail_count > 0:
@@ -392,6 +401,85 @@ func _test_no_overtime_before_60s() -> void:
 	for _i in range(599):
 		sim.simulate_tick()
 	assert_true(not sim.overtime_active, "Overtime NOT active at tick 599")
+
+# ============= OVERTIME DAMAGE AMP =============
+
+func _test_overtime_damage_mult_constant() -> void:
+	print("test_overtime_damage_mult_constant")
+	assert_near(CombatSim.OVERTIME_DAMAGE_MULT, 1.5, 0.001, "OVERTIME_DAMAGE_MULT = 1.5")
+
+func _test_sudden_death_ticks_constant() -> void:
+	print("test_sudden_death_ticks_constant")
+	assert_eq(CombatSim.SUDDEN_DEATH_TICKS, 750, "SUDDEN_DEATH_TICKS = 75 * 10 = 750")
+
+func _test_sudden_death_damage_mult_constant() -> void:
+	print("test_sudden_death_damage_mult_constant")
+	assert_near(CombatSim.SUDDEN_DEATH_DAMAGE_MULT, 2.0, 0.001, "SUDDEN_DEATH_DAMAGE_MULT = 2.0")
+
+func _test_overtime_damage_amp_applied() -> void:
+	print("test_overtime_damage_amp_applied")
+	# Create two brotts, advance to overtime, check damage is amplified
+	var sim := CombatSim.new(42)
+	var b := _make_brott(0, ChassisData.ChassisType.FORTRESS)
+	b.armor_type = ArmorData.ArmorType.NONE
+	b.setup()
+	var enemy := _make_brott(1, ChassisData.ChassisType.FORTRESS)
+	enemy.armor_type = ArmorData.ArmorType.NONE
+	enemy.position = Vector2(12 * 32.0, 8 * 32.0)
+	enemy.setup()
+	sim.add_brott(b)
+	sim.add_brott(enemy)
+	# Advance to tick 600 (overtime)
+	for _i in range(600):
+		sim.simulate_tick()
+	assert_true(sim.overtime_active, "Overtime active for damage amp test")
+	assert_true(not sim.sudden_death_active, "Sudden death NOT active at tick 600")
+
+func _test_sudden_death_triggers_at_75s() -> void:
+	print("test_sudden_death_triggers_at_75s")
+	var sim := CombatSim.new(42)
+	var b := _make_brott(0, ChassisData.ChassisType.FORTRESS)
+	b.setup()
+	var enemy := _make_brott(1, ChassisData.ChassisType.FORTRESS)
+	enemy.position = Vector2(14 * 32.0, 8 * 32.0)
+	enemy.setup()
+	sim.add_brott(b)
+	sim.add_brott(enemy)
+	for _i in range(750):
+		sim.simulate_tick()
+	assert_true(sim.sudden_death_active, "Sudden death active at tick 750")
+
+func _test_sudden_death_damage_amp_applied() -> void:
+	print("test_sudden_death_damage_amp_applied")
+	var sim := CombatSim.new(42)
+	var b := _make_brott(0, ChassisData.ChassisType.FORTRESS)
+	b.armor_type = ArmorData.ArmorType.NONE
+	b.setup()
+	var enemy := _make_brott(1, ChassisData.ChassisType.FORTRESS)
+	enemy.armor_type = ArmorData.ArmorType.NONE
+	enemy.position = Vector2(14 * 32.0, 8 * 32.0)
+	enemy.setup()
+	sim.add_brott(b)
+	sim.add_brott(enemy)
+	for _i in range(750):
+		sim.simulate_tick()
+	assert_true(sim.sudden_death_active, "Sudden death active for damage amp test")
+	assert_true(sim.overtime_active, "Overtime also active during sudden death")
+
+func _test_no_damage_amp_before_overtime() -> void:
+	print("test_no_damage_amp_before_overtime")
+	var sim := CombatSim.new(42)
+	var b := _make_brott(0, ChassisData.ChassisType.BRAWLER)
+	b.setup()
+	var enemy := _make_brott(1, ChassisData.ChassisType.BRAWLER)
+	enemy.position = Vector2(14 * 32.0, 8 * 32.0)
+	enemy.setup()
+	sim.add_brott(b)
+	sim.add_brott(enemy)
+	for _i in range(599):
+		sim.simulate_tick()
+	assert_true(not sim.overtime_active, "No overtime before 60s")
+	assert_true(not sim.sudden_death_active, "No sudden death before 60s")
 
 # ============= HELPERS =============
 

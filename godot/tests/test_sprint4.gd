@@ -66,6 +66,15 @@ func _init() -> void:
 	_test_sudden_death_damage_amp_applied()
 	_test_no_damage_amp_before_overtime()
 	
+	# --- SHRINKING ARENA TESTS ---
+	_test_arena_shrink_rate_constant()
+	_test_arena_boundary_damage_constant()
+	_test_arena_boundary_starts_at_8()
+	_test_arena_shrinks_during_overtime()
+	_test_boundary_damage_applied_outside()
+	_test_no_boundary_damage_inside()
+	_test_arena_tiny_at_80s()
+	
 	print("\n=== Results: %d passed, %d failed, %d total ===" % [pass_count, fail_count, test_count])
 	
 	if fail_count > 0:
@@ -480,6 +489,101 @@ func _test_no_damage_amp_before_overtime() -> void:
 		sim.simulate_tick()
 	assert_true(not sim.overtime_active, "No overtime before 60s")
 	assert_true(not sim.sudden_death_active, "No sudden death before 60s")
+
+# ============= SHRINKING ARENA =============
+
+func _test_arena_shrink_rate_constant() -> void:
+	print("test_arena_shrink_rate_constant")
+	assert_near(CombatSim.ARENA_SHRINK_RATE, 0.5, 0.001, "ARENA_SHRINK_RATE = 0.5 tiles/sec")
+
+func _test_arena_boundary_damage_constant() -> void:
+	print("test_arena_boundary_damage_constant")
+	assert_near(CombatSim.ARENA_BOUNDARY_DAMAGE, 10.0, 0.001, "ARENA_BOUNDARY_DAMAGE = 10 dmg/sec")
+
+func _test_arena_boundary_starts_at_8() -> void:
+	print("test_arena_boundary_starts_at_8")
+	var sim := CombatSim.new(42)
+	assert_near(sim.arena_boundary_tiles, 8.0, 0.001, "Arena boundary starts at 8 tiles")
+
+func _test_arena_shrinks_during_overtime() -> void:
+	print("test_arena_shrinks_during_overtime")
+	var sim := CombatSim.new(42)
+	var b := _make_brott(0, ChassisData.ChassisType.FORTRESS)
+	b.setup()
+	var enemy := _make_brott(1, ChassisData.ChassisType.FORTRESS)
+	enemy.position = Vector2(8 * 32.0, 8 * 32.0)  # Center — safe
+	enemy.setup()
+	sim.add_brott(b)
+	sim.add_brott(enemy)
+	b.position = Vector2(8 * 32.0, 7 * 32.0)  # Near center — safe
+	# Advance to 65s (5s into overtime)
+	for _i in range(650):
+		sim.simulate_tick()
+	# After 5s of overtime, boundary should be 8 - 5*0.5 = 5.5 tiles
+	assert_near(sim.arena_boundary_tiles, 5.5, 0.1, "Arena boundary ~5.5 tiles at 65s")
+
+func _test_boundary_damage_applied_outside() -> void:
+	print("test_boundary_damage_applied_outside")
+	var sim := CombatSim.new(42)
+	var b := _make_brott(0, ChassisData.ChassisType.FORTRESS)
+	b.armor_type = ArmorData.ArmorType.PLATING  # armor shouldn't matter — boundary ignores it
+	b.setup()
+	var starting_hp: float = b.hp
+	# Place bot at far edge
+	b.position = Vector2(1 * 32.0, 1 * 32.0)
+	var enemy := _make_brott(1, ChassisData.ChassisType.FORTRESS)
+	enemy.position = Vector2(8 * 32.0, 8 * 32.0)
+	enemy.setup()
+	sim.add_brott(b)
+	sim.add_brott(enemy)
+	# Advance to 70s (10s into overtime, boundary = 8 - 10*0.5 = 3 tiles from center)
+	# Bot at (32, 32) is ~7 tiles from center — outside 3-tile boundary
+	for _i in range(700):
+		sim.simulate_tick()
+	if b.alive:
+		assert_true(b.hp < starting_hp, "Bot outside boundary took damage")
+	else:
+		assert_true(true, "Bot outside boundary died (expected)")
+
+func _test_no_boundary_damage_inside() -> void:
+	print("test_no_boundary_damage_inside")
+	var sim := CombatSim.new(42)
+	var b := _make_brott(0, ChassisData.ChassisType.FORTRESS)
+	b.armor_type = ArmorData.ArmorType.NONE
+	b.weapon_types = []
+	b.setup()
+	# Place bot at dead center
+	b.position = Vector2(8 * 32.0, 8 * 32.0)
+	var enemy := _make_brott(1, ChassisData.ChassisType.FORTRESS)
+	enemy.weapon_types = []
+	enemy.position = Vector2(8 * 32.0, 7 * 32.0)
+	enemy.setup()
+	sim.add_brott(b)
+	sim.add_brott(enemy)
+	var starting_hp: float = b.hp
+	# Advance to 65s — boundary is 5.5 tiles, bot at center is safe
+	for _i in range(650):
+		sim.simulate_tick()
+	assert_near(b.hp, starting_hp, 0.01, "Bot at center took no boundary damage")
+
+func _test_arena_tiny_at_80s() -> void:
+	print("test_arena_tiny_at_80s")
+	var sim := CombatSim.new(42)
+	var b := _make_brott(0, ChassisData.ChassisType.FORTRESS)
+	b.setup()
+	var enemy := _make_brott(1, ChassisData.ChassisType.FORTRESS)
+	enemy.position = Vector2(8 * 32.0, 8 * 32.0)
+	enemy.setup()
+	b.position = Vector2(8 * 32.0, 7 * 32.0)
+	sim.add_brott(b)
+	sim.add_brott(enemy)
+	# Advance to 80s (20s into overtime, boundary = 8 - 20*0.5 = -2 -> clamped to 0)
+	for _i in range(800):
+		sim.simulate_tick()
+		if sim.match_over:
+			break
+	# Boundary should be 0 or very small
+	assert_true(sim.arena_boundary_tiles <= 0.5, "Arena boundary tiny/zero at 80s")
 
 # ============= HELPERS =============
 

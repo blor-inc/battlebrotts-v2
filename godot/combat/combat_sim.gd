@@ -15,6 +15,9 @@ const OVERTIME_SPEED_MULT: float = 1.2  # +20% movement speed in overtime
 const OVERTIME_DAMAGE_MULT: float = 1.5  # 50% damage amp during overtime (60s+)
 const SUDDEN_DEATH_TICKS: int = 75 * 10  # 750 ticks = 75s — sudden death escalation
 const SUDDEN_DEATH_DAMAGE_MULT: float = 2.0  # 100% damage amp during sudden death (75s+)
+const ARENA_SHRINK_RATE: float = 0.5  # tiles per second boundary contracts
+const ARENA_BOUNDARY_DAMAGE: float = 10.0  # damage per second outside boundary (ignores armor)
+const ARENA_TILES: int = 16
 const BOT_HITBOX_RADIUS: float = 12.0
 const TILE_SIZE: float = 32.0
 
@@ -26,6 +29,7 @@ var match_over: bool = false
 var winner_team: int = -1
 var overtime_active: bool = false
 var sudden_death_active: bool = false
+var arena_boundary_tiles: float = 8.0  # half-size in tiles from center (starts at 8 = full 16x16)
 
 signal on_damage(target: BrottState, amount: float, is_crit: bool, pos: Vector2)
 signal on_projectile_spawned(proj: Projectile)
@@ -56,6 +60,29 @@ func simulate_tick() -> void:
 	# Check sudden death escalation
 	if not sudden_death_active and tick_count >= SUDDEN_DEATH_TICKS:
 		sudden_death_active = true
+
+	# Shrink arena boundary during overtime
+	if overtime_active:
+		var shrink_per_tick: float = ARENA_SHRINK_RATE / float(TICKS_PER_SEC)
+		arena_boundary_tiles = maxf(0.0, 8.0 - (float(tick_count - OVERTIME_TICKS) / float(TICKS_PER_SEC)) * ARENA_SHRINK_RATE)
+	
+	# Apply boundary damage to bots outside the shrinking arena
+	if overtime_active:
+		var center_px: float = float(ARENA_TILES) / 2.0 * TILE_SIZE
+		var center := Vector2(center_px, center_px)
+		var boundary_px: float = arena_boundary_tiles * TILE_SIZE
+		for b in brotts:
+			if not b.alive:
+				continue
+			var dx: float = absf(b.position.x - center.x)
+			var dy: float = absf(b.position.y - center.y)
+			if dx > boundary_px or dy > boundary_px:
+				var dmg: float = ARENA_BOUNDARY_DAMAGE / float(TICKS_PER_SEC)
+				b.hp -= dmg
+				b.flash_timer = 2.0
+				on_damage.emit(b, dmg, false, b.position)
+				if b.hp <= 0:
+					_kill_brott(b)
 
 	for b in brotts:
 		if not b.alive:
@@ -480,6 +507,9 @@ func _check_match_end() -> void:
 		else:
 			winner_team = 2
 		on_match_end.emit(winner_team)
+
+func get_arena_boundary_tiles() -> float:
+	return arena_boundary_tiles
 
 func _team_hp_pct(team: int) -> float:
 	var total_hp: float = 0.0

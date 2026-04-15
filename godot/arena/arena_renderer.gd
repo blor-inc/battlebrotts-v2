@@ -24,6 +24,8 @@ const COLOR_HP_LOW := Color(0.9, 0.2, 0.1)
 const COLOR_ENERGY := Color(0.2, 0.7, 1.0)
 const COLOR_BAR_BG := Color(0.1, 0.1, 0.1, 0.8)
 const COLOR_EXPLOSION := Color(1.0, 0.6, 0.1)
+const COLOR_DANGER_ZONE := Color(0.8, 0.1, 0.1, 0.35)
+const COLOR_DANGER_BORDER := Color(1.0, 0.15, 0.1, 0.8)
 
 var sim: CombatSim = null
 var arena_offset: Vector2 = Vector2.ZERO
@@ -408,6 +410,10 @@ func _draw() -> void:
 		draw_line(Vector2(x, draw_offset.y), Vector2(x, draw_offset.y + ARENA_PX), COLOR_GRID, 1.0)
 		draw_line(Vector2(draw_offset.x, y), Vector2(draw_offset.x + ARENA_PX, y), COLOR_GRID, 1.0)
 	
+	# Danger zone overlay (shrinking arena boundary)
+	if sim.overtime_active:
+		_draw_danger_zone(draw_offset)
+	
 	# Pillars
 	for ppos: Vector2 in sim._get_pillar_positions():
 		draw_circle(ppos + draw_offset, PILLAR_RADIUS, COLOR_PILLAR)
@@ -475,6 +481,39 @@ func _draw() -> void:
 	if sudden_death_flash_timer > 0:
 		var flash_alpha := clampf(sudden_death_flash_timer / 90.0 * 0.4, 0.0, 0.4)
 		draw_rect(Rect2(Vector2.ZERO, Vector2(1280, 720)), Color(1, 0, 0, flash_alpha))
+
+func _draw_danger_zone(draw_offset: Vector2) -> void:
+	var boundary: float = sim.get_arena_boundary_tiles()
+	var center_px: float = float(ARENA_TILES) / 2.0 * TILE_SIZE
+	var boundary_px: float = boundary * TILE_SIZE
+	
+	# Safe zone rect (centered)
+	var safe_left: float = draw_offset.x + center_px - boundary_px
+	var safe_top: float = draw_offset.y + center_px - boundary_px
+	var safe_size: float = boundary_px * 2.0
+	
+	# Draw danger overlays on four sides
+	# Top strip
+	if safe_top > draw_offset.y:
+		draw_rect(Rect2(Vector2(draw_offset.x, draw_offset.y), Vector2(ARENA_PX, safe_top - draw_offset.y)), COLOR_DANGER_ZONE)
+	# Bottom strip
+	var safe_bottom: float = safe_top + safe_size
+	if safe_bottom < draw_offset.y + ARENA_PX:
+		draw_rect(Rect2(Vector2(draw_offset.x, safe_bottom), Vector2(ARENA_PX, draw_offset.y + ARENA_PX - safe_bottom)), COLOR_DANGER_ZONE)
+	# Left strip (between top and bottom strips)
+	if safe_left > draw_offset.x:
+		draw_rect(Rect2(Vector2(draw_offset.x, safe_top), Vector2(safe_left - draw_offset.x, safe_size)), COLOR_DANGER_ZONE)
+	# Right strip
+	var safe_right: float = safe_left + safe_size
+	if safe_right < draw_offset.x + ARENA_PX:
+		draw_rect(Rect2(Vector2(safe_right, safe_top), Vector2(draw_offset.x + ARENA_PX - safe_right, safe_size)), COLOR_DANGER_ZONE)
+	
+	# Draw pulsing border around safe zone
+	var pulse: float = sin(float(frame_count) * 0.1) * 0.2 + 0.8
+	var border_col := COLOR_DANGER_BORDER
+	border_col.a *= pulse
+	var safe_rect := Rect2(Vector2(safe_left, safe_top), Vector2(safe_size, safe_size))
+	draw_rect(safe_rect, border_col, false, 2.0)
 
 func _draw_brott(b: BrottState, draw_offset: Vector2) -> void:
 	var pos: Vector2 = b.position + draw_offset

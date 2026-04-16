@@ -15,7 +15,7 @@ const TRICKS := [
 		"id": "scavenger_kid",
 		"brottbrain_text": "I don't trust that kid.",
 		"prompt": "A scrawny scavenger waves a mystery bundle at you. \"Five bolts. No peeking.\"",
-		"choice_a": {"label": "Buy mystery (-5 bolts)", "effect_type": EffectType.ITEM_GRANT, "effect_value": "random_weak", "effect_type_2": EffectType.BOLTS_DELTA, "effect_value_2": -5, "flavor_line": "Ugh, of course it's that."},
+		"choice_a": {"label": "Buy mystery (-5 bolts)", "effect_type": EffectType.ITEM_GRANT, "effect_value": "random_weak", "effect_type_2": EffectType.BOLTS_DELTA, "effect_value_2": -5, "flavor_line": "Ugh, of course it's a {item_name}."},
 		"choice_b": {"label": "Walk away", "effect_type": EffectType.BOLTS_DELTA, "effect_value": 0, "flavor_line": "Good call. That kid's a menace."},
 	},
 	{
@@ -30,21 +30,21 @@ const TRICKS := [
 		"id": "crate_find",
 		"brottbrain_text": "...looks like a crate. Could be good, could be rats.",
 		"prompt": "Pry it open?",
-		"choice_a": {"label": "Crack it", "effect_type": EffectType.ITEM_GRANT, "effect_value": "random_weak", "flavor_line": "Nice. Something useful."},
+		"choice_a": {"label": "Crack it", "effect_type": EffectType.ITEM_GRANT, "effect_value": "random_weak", "flavor_line": "Nice. Found a {item_name}."},
 		"choice_b": {"label": "Walk past", "effect_type": EffectType.BOLTS_DELTA, "effect_value": 0, "flavor_line": "Smart. Rats."},
 	},
 	{
 		"id": "toll_goblin",
 		"brottbrain_text": "Goblin wants a toll. Tiny little guy. Could take him.",
 		"prompt": "Pay up or scuffle?",
-		"choice_a": {"label": "Hand something over", "effect_type": EffectType.ITEM_LOSE, "effect_value": "random_weak", "effect_type_2": EffectType.BOLTS_DELTA, "effect_value_2": 5, "flavor_line": "Goblin grunts, lets you pass. You find 5 bolts he dropped."},
+		"choice_a": {"label": "Hand something over", "effect_type": EffectType.ITEM_LOSE, "effect_value": "random_weak", "effect_type_2": EffectType.BOLTS_DELTA, "effect_value_2": 5, "flavor_line": "Goblin grunts, takes your {item_name}. Drops 5 bolts on the way out."},
 		"choice_b": {"label": "Bribe him", "effect_type": EffectType.BOLTS_DELTA, "effect_value": -10, "flavor_line": "10 bolts poorer. He didn't even say thanks."},
 	},
 	{
 		"id": "scrap_trader",
 		"brottbrain_text": "Scrap trader. Module for 15 bolts, or a quick haggle.",
 		"prompt": "Buy or haggle?",
-		"choice_a": {"label": "Pay 15", "effect_type": EffectType.BOLTS_DELTA, "effect_value": -15, "effect_type_2": EffectType.ITEM_GRANT, "effect_value_2": "random_module", "flavor_line": "New module installed."},
+		"choice_a": {"label": "Pay 15", "effect_type": EffectType.BOLTS_DELTA, "effect_value": -15, "effect_type_2": EffectType.ITEM_GRANT, "effect_value_2": "random_module", "flavor_line": "Installed a {item_name}."},
 		"choice_b": {"label": "Haggle (−5)", "effect_type": EffectType.BOLTS_DELTA, "effect_value": -5, "flavor_line": "Haggled him down. No module though."},
 	},
 ]

@@ -23,13 +23,15 @@ jobs:
 
       - name: Run Godot tests
         run: |
+          set -e
           godot --headless --path godot/ --script res://tests/test_runner.gd
-          godot --headless --path godot/ --script res://tests/test_sprint13_2.gd
-          godot --headless --path godot/ --script res://tests/test_sprint13_3.gd
-          godot --headless --path godot/ --script res://tests/test_sprint13_4.gd
-          godot --headless --path godot/ --script res://tests/test_sprint13_5.gd
-          godot --headless --path godot/ --script res://tests/test_sprint13_6.gd
-          godot --headless --path godot/ --script res://tests/test_sprint13_7.gd
+          # Glob-based discovery: picks up test_sprint*.gd automatically (S13.8).
+          # Pattern excludes fixture/helper files (combat_batch.gd, pacing_verify.gd, etc.).
+          for f in godot/tests/test_sprint*.gd; do
+            name="$(basename "$f")"
+            echo "Running $name"
+            godot --headless --path godot/ --script "res://tests/$name" || exit 1
+          done
 
   playwright:
     name: Playwright Smoke Tests

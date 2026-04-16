@@ -119,8 +119,10 @@ func _maybe_show_trick_then_build() -> void:
 	var result: Array = await modal.resolved
 	# result = [trick_id, choice_key]
 	var choice_key: String = String(result[1]) if result.size() >= 2 else "choice_a"
-	game_state.apply_trick_choice(trick, choice_key)
+	# S13.8: queue_free BEFORE apply so modal is always reclaimed,
+	# even if apply_trick_choice raises on malformed trick data.
 	modal.queue_free()
+	game_state.apply_trick_choice(trick, choice_key)
 	_build_ui()
 
 # --- UI construction ---

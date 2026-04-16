@@ -9,8 +9,14 @@ signal resolved(trick_id: String, choice_key: String)
 @onready var _btn_b: Button = $Overlay/Panel/VBox/Buttons/ChoiceB
 @onready var _toast: Label = $Overlay/Toast
 var _trick: Dictionary = {}
+# S13.8: one-shot guard. Modal instances are single-use; shop_screen creates
+# a fresh instance per visit, so we don't reset this. Re-entry is a no-op.
+var _trick_shown: bool = false
 
 func show_trick(trick: Dictionary) -> void:
+	if _trick_shown:
+		return
+	_trick_shown = true
 	_trick = trick
 	_dialogue.text = trick["brottbrain_text"]
 	_prompt.text = trick["prompt"]

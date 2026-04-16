@@ -47,27 +47,34 @@ static func get_league_opponents(league: String) -> Array:
 		_:
 			return []
 
-static func build_opponent_brott(league: String, index: int) -> BrottState:
-	var data := get_opponent(league, index)
-	if data.is_empty():
+## S13.9: Uses OpponentLoadouts picker (archetype templates + variety).
+## Legacy get_opponent() retained for UI preview / back-compat reads.
+## game_state is optional; when provided, variety tracking via
+## _last_opponent_archetype prevents back-to-back archetype repeats.
+static func build_opponent_brott(league: String, index: int, game_state: GameState = null) -> BrottState:
+	var tier: int = OpponentLoadouts.difficulty_for(league, index)
+	var last_arch: int = -1
+	if game_state != null:
+		last_arch = game_state._last_opponent_archetype
+	var template: Dictionary = OpponentLoadouts.pick_opponent_loadout(tier, last_arch)
+	if template.is_empty():
 		return null
-	
+
 	var b := BrottState.new()
 	b.team = 1
-	b.bot_name = data["name"]
-	b.chassis_type = data["chassis"]
-	for wt in data["weapons"]:
+	b.bot_name = template["name"]
+	b.chassis_type = template["chassis"]
+	for wt in template["weapons"]:
 		b.weapon_types.append(wt)
-	b.armor_type = data["armor"]
-	for mt in data["modules"]:
+	b.armor_type = template["armor"]
+	for mt in template["modules"]:
 		b.module_types.append(mt)
-	b.stance = data["stance"]
+	b.stance = template["stance"]
 	b.setup()
-	
-	# Use default brain if no custom one specified
-	if data["brain"] == null:
-		b.brain = BrottBrain.default_for_chassis(data["chassis"])
-	
+	b.brain = BrottBrain.default_for_chassis(template["chassis"])
+
+	if game_state != null:
+		game_state._last_opponent_archetype = template["archetype"]
 	return b
 
 static func get_league_size(league: String) -> int:

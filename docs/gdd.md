@@ -336,6 +336,55 @@ Total: **26 matches** to complete all leagues.
 
 Enemy Brott stat scaling: **none**. Enemies use the same items and stats as the player. Difficulty comes from better BrottBrains and loadout synergy.
 
+### 6.3 Opponent Archetype Taxonomy (Sprint 13.9)
+
+Opponent loadouts are now **template-driven**: each enemy match draws from a
+pool of named templates (`godot/data/opponent_loadouts.gd`) filtered by
+difficulty tier, with a variety guarantee preventing back-to-back archetype
+repeats. Templates are the single source of truth for an opponent's name,
+chassis, weapons, armor, modules, and stance.
+
+**Archetypes** (5):
+
+- **TANK** — Heavy armor, brawler stance, sustain modules. Punishes players with no sustain.
+- **GLASS_CANNON** — No armor, long-range burst (railgun), kiting stance. Punishes players with no mobility.
+- **SKIRMISHER** — Medium armor, flak + mobility modules, kiting stance. Generalist harasser; tests positional discipline.
+- **BRUISER** — Medium armor, dual weapons, aggressive stance. Midrange pressure; rewards TCR-window commitment.
+- **CONTROLLER** — Disruption (jammer / EMP / arc emitter), defensive stance. Punishes module-reliant player builds.
+
+**Starter templates** (6):
+
+| ID | Name | Archetype | Tier | Composition |
+|---|---|---|---|---|
+| `tank_ironclad` | Ironclad | TANK | 2 | Fortress + Shotgun/Flak + Ablative + Repair Nanites |
+| `glass_sniper` | Pinprick | GLASS_CANNON | 2 | Scout + Railgun/Plasma + None + Overclock/Sensor/Afterburner |
+| `skirmish_wasp` | Wasp | SKIRMISHER | 1 | Scout + Flak/Plasma + Plating + Afterburner/Sensor/Overclock |
+| `bruiser_crusher` | Crusher-II | BRUISER | 2 | Brawler + Shotgun/Minigun + Reactive + Overclock/Repair |
+| `controller_jammer` | Jammer | CONTROLLER | 3 | Brawler + Arc/Missile + Reactive + EMP/Shield Projector |
+| `tank_tincan` | Tincan | TANK | 1 | Scout + Plasma + Plating |
+
+**Difficulty tier mapping** (`OpponentLoadouts.difficulty_for(league, index)`):
+
+- **Scrapyard** indices 0, 1, 2 → tiers **1, 1, 2**
+- **Bronze** indices 0, 1, 2 → tiers **2, 2, 3** (hooks only; league unpopulated)
+
+Picker fallback: when a tier's pool has fewer than 2 entries, tier-1-lower
+templates are added. The variety strip (`last_archetype != pick.archetype`)
+is applied last and skipped when it would empty the pool.
+
+**Variety rule:** no two consecutive opponent builds within a run share the
+same archetype. State lives on `GameState._last_opponent_archetype` and is
+naturally cleared by `GameFlow.new_game()` (fresh GameState per run).
+
+**Design notes:**
+
+- Archetypes are a **template-level** concept, not a chassis-level one
+  (per Ett, S13.9). Chassis data carries stats + TCR only; archetype
+  personality comes from the template's weapon/armor/module combination.
+- Counter-play hook reserved for **Sprint 13.10**: picker signature
+  accepts `_player_archetype_hint` (currently unused) so tier/variety
+  logic can later be composed with matchup-aware filtering.
+
 ---
 
 ## 7. Economy

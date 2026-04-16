@@ -41,6 +41,10 @@ func _run_all() -> void:
 	_t8_picker_variety_10_picks()
 	_t9_picker_variety_fallback_when_pool_size_1()
 	_t10_difficulty_for_scrapyard()
+	_t11_build_opponent_brott_uses_picker()
+	_t12_build_opponent_brott_variety()
+	_t13_build_opponent_brott_null_game_state()
+	_t14_picker_accepts_player_archetype_hint()
 
 func _is_valid_template(t: Dictionary) -> bool:
 	for k in ["id", "name", "archetype", "tier", "chassis", "weapons", "armor", "modules", "stance"]:
@@ -118,3 +122,63 @@ func _t10_difficulty_for_scrapyard() -> void:
 	assert_eq(OpponentLoadouts.difficulty_for("scrapyard", 0), 1, "T10a scrapyard[0]=1")
 	assert_eq(OpponentLoadouts.difficulty_for("scrapyard", 1), 1, "T10b scrapyard[1]=1")
 	assert_eq(OpponentLoadouts.difficulty_for("scrapyard", 2), 2, "T10c scrapyard[2]=2")
+
+## ===== Nutts-B integration tests (11-14) =====
+
+func _template_archetypes_for_tier(tier: int) -> Array:
+	var pool: Array = []
+	for t in OpponentLoadouts.TEMPLATES:
+		if t.tier == tier:
+			pool.append(t.archetype)
+		elif tier == 1 and t.tier == 0:  # won't happen, tiers start at 1
+			pool.append(t.archetype)
+	return pool
+
+func _t11_build_opponent_brott_uses_picker() -> void:
+	var gs := GameState.new()
+	# scrapyard[2] -> tier 2. Call a few times; every result must match a template.
+	var all_ok := true
+	for i in 5:
+		var b: BrottState = OpponentData.build_opponent_brott("scrapyard", 2, gs)
+		if b == null:
+			all_ok = false
+			break
+		var matched := false
+		for t in OpponentLoadouts.TEMPLATES:
+			if t.name == b.bot_name and t.chassis == b.chassis_type and t.armor == b.armor_type and t.stance == b.stance:
+				matched = true
+				break
+		if not matched:
+			all_ok = false
+			break
+	assert_true(all_ok, "T11 build_opponent_brott_uses_picker — brott fields match a template")
+
+func _t12_build_opponent_brott_variety() -> void:
+	# scrapyard[2] tier 2. Pool at tier 2 has 3 templates across ≥2 archetypes.
+	# 5 consecutive builds with the same GameState: never back-to-back same archetype.
+	var gs := GameState.new()
+	var last_arch: int = -1
+	var no_repeat := true
+	var any_brott := true
+	for i in 5:
+		var b: BrottState = OpponentData.build_opponent_brott("scrapyard", 2, gs)
+		if b == null:
+			any_brott = false
+			break
+		var arch: int = gs._last_opponent_archetype
+		if last_arch != -1 and arch == last_arch:
+			no_repeat = false
+		last_arch = arch
+	assert_true(any_brott, "T12a build_opponent_brott_variety — all builds non-null")
+	assert_true(no_repeat, "T12b build_opponent_brott_variety — no back-to-back archetype")
+
+func _t13_build_opponent_brott_null_game_state() -> void:
+	# Back-compat: callable without GameState; must still return a valid brott.
+	var b: BrottState = OpponentData.build_opponent_brott("scrapyard", 0, null)
+	var ok: bool = b != null and b.team == 1 and b.bot_name != "" and b.brain != null
+	assert_true(ok, "T13 build_opponent_brott_null_game_state — valid brott, no crash")
+
+func _t14_picker_accepts_player_archetype_hint() -> void:
+	# Signature stability: third param (player_archetype_hint) accepted without error.
+	var pick: Dictionary = OpponentLoadouts.pick_opponent_loadout(2, -1, OpponentLoadouts.Archetype.TANK)
+	assert_true(_is_valid_template(pick), "T14 picker_accepts_player_archetype_hint — valid template with hint param")

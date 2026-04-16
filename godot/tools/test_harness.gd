@@ -208,7 +208,7 @@ func _start_arena_match() -> void:
 	var opp_idx := game_flow.selected_opponent_index
 	if opp_idx < 0:
 		opp_idx = 0
-	enemy_brott = OpponentData.build_opponent_brott(game_flow.game_state.current_league, opp_idx)
+	enemy_brott = OpponentData.build_opponent_brott(game_flow.game_state.current_league, opp_idx, game_flow.game_state)
 	enemy_brott.position = Vector2(12 * 32.0, 8 * 32.0)
 
 	# Create sim

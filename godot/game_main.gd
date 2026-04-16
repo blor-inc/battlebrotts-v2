@@ -195,7 +195,7 @@ func _start_match(opponent_index: int) -> void:
 		player_brott.brain = BrottBrain.default_for_chassis(game_flow.game_state.equipped_chassis)
 	
 	# Build enemy brott
-	enemy_brott = OpponentData.build_opponent_brott(game_flow.game_state.current_league, opponent_index)
+	enemy_brott = OpponentData.build_opponent_brott(game_flow.game_state.current_league, opponent_index, game_flow.game_state)
 	enemy_brott.position = Vector2(12 * 32.0, 8 * 32.0)
 	
 	# Create sim

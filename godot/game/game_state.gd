@@ -19,6 +19,11 @@ var equipped_modules: Array[int] = []
 
 ## Progression
 var current_league: String = "scrapyard"
+
+## S13.9: tracks previous opponent archetype for variety-preserving picker.
+## OpponentLoadouts.Archetype enum value, or -1 when unset (fresh run).
+var _last_opponent_archetype: int = -1
+
 var opponents_beaten: Array[String] = []  # "scrapyard_0", "scrapyard_1", etc.
 var first_wins: Array[String] = []  # Tracks first-win bonus
 var bronze_unlocked: bool = false

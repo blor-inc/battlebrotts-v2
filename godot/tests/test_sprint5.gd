@@ -51,11 +51,11 @@ func _assert(condition: bool, name: String) -> void:
 # --- VIEWPORT CONFIGURATION ---
 
 func _test_viewport_width() -> void:
-	var settings := ProjectSettings.get_setting("display/window/size/viewport_width")
+	var settings: Variant = ProjectSettings.get_setting("display/window/size/viewport_width")
 	_assert(settings == 1280, "Viewport width is 1280")
 
 func _test_viewport_height() -> void:
-	var settings := ProjectSettings.get_setting("display/window/size/viewport_height")
+	var settings: Variant = ProjectSettings.get_setting("display/window/size/viewport_height")
 	_assert(settings == 720, "Viewport height is 720")
 
 func _test_stretch_mode() -> void:

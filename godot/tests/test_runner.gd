@@ -202,11 +202,11 @@ func _run_combat_tests() -> void:
 	# Test match timeout
 	var sim2 := CombatSim.new(2)
 	var b1 := _make_brott(0, ChassisData.ChassisType.FORTRESS)
-	b1.position = Vector2(32, 32)
+	b1.position = Vector2(256, 256)
 	b1.weapon_types = []
 	b1.weapon_cooldowns = []
 	var b2 := _make_brott(1, ChassisData.ChassisType.FORTRESS)
-	b2.position = Vector2(480, 480)
+	b2.position = Vector2(260, 260)
 	b2.weapon_types = []
 	b2.weapon_cooldowns = []
 	sim2.add_brott(b1)

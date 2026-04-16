@@ -8,7 +8,7 @@ var test_count := 0
 var _hit_count := 0
 
 const CombatSim = preload("res://combat/combat_sim.gd")
-const BrottData = preload("res://combat/brott_data.gd")
+#const BrottData = preload("res://combat/brott_data.gd")  # removed: file doesn't exist
 
 func _init() -> void:
 	print("=== BattleBrotts Sprint 10 Test Suite ===\n")

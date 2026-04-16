@@ -202,21 +202,25 @@ func _run_combat_tests() -> void:
 	# Test match timeout
 	var sim2 := CombatSim.new(2)
 	var b1 := _make_brott(0, ChassisData.ChassisType.FORTRESS)
-	b1.position = Vector2(32, 32)
+	b1.position = Vector2(256, 256)
 	b1.weapon_types = []
 	b1.weapon_cooldowns = []
+	b1.hp = 99999.0
+	b1.max_hp = 99999
 	var b2 := _make_brott(1, ChassisData.ChassisType.FORTRESS)
-	b2.position = Vector2(480, 480)
+	b2.position = Vector2(260, 260)
 	b2.weapon_types = []
 	b2.weapon_cooldowns = []
+	b2.hp = 99999.0
+	b2.max_hp = 99999
 	sim2.add_brott(b1)
 	sim2.add_brott(b2)
 	
-	# Fast forward to timeout (90s * 10 ticks/sec = 900 ticks)
-	for i in 900:
+	# Fast forward to timeout (100s * 10 ticks/sec = 1000 ticks)
+	for i in 1000:
 		sim2.simulate_tick()
 	assert_true(sim2.match_over, "Match ends at timeout")
-	assert_eq(sim2.tick_count, 900, "Tick count = 900 at timeout")
+	assert_eq(sim2.tick_count, 1000, "Tick count = 1000 at timeout")
 	
 	# Test brott death
 	var sim3 := CombatSim.new(3)
@@ -376,17 +380,22 @@ func _make_brott(team: int, chassis: ChassisData.ChassisType) -> BrottState:
 func _run_sprint10_tests() -> void:
 	print("\n--- Sprint 10 Tests ---")
 	# Stalemate detection: 300-tick sim, bots should move
-	var sim := CombatSim.new()
-	sim.rng_seed = 42
-	var bd := {"name": "TestBot", "hp": 100, "max_hp": 100, "armor_dr": 0, "speed": 3.0,
-		"weapons": [{"type": "plasma_cutter", "damage": 10, "cooldown": 5, "range": 80.0, "projectile_speed": 200.0}],
-		"stance": 0, "team": 0, "modules": [], "chassis": "standard"}
-	var bd2 := bd.duplicate(true)
-	bd2["team"] = 1
-	sim.setup([bd], [bd2])
+	var sim := CombatSim.new(42)
+	var bot_a := _make_brott(0, ChassisData.ChassisType.BRAWLER)
+	bot_a.position = Vector2(64, 128)
+	bot_a.stance = 0  # Aggressive
+	bot_a.weapon_types = [WeaponData.WeaponType.PLASMA_CUTTER]
+	bot_a.weapon_cooldowns = [0.0]
+	var bot_b := _make_brott(1, ChassisData.ChassisType.BRAWLER)
+	bot_b.position = Vector2(448, 384)
+	bot_b.stance = 0  # Aggressive
+	bot_b.weapon_types = [WeaponData.WeaponType.PLASMA_CUTTER]
+	bot_b.weapon_cooldowns = [0.0]
+	sim.add_brott(bot_a)
+	sim.add_brott(bot_b)
 	var positions: Array[Vector2] = []
 	for tick in range(300):
-		sim.tick()
+		sim.simulate_tick()
 		if tick % 50 == 0 and sim.brotts.size() > 0 and sim.brotts[0].alive:
 			positions.append(sim.brotts[0].position)
 	var moved := false

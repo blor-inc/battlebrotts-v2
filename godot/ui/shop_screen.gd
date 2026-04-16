@@ -115,13 +115,64 @@ func _maybe_show_trick_then_build() -> void:
 		return
 	var modal := modal_scene.instantiate()
 	add_child(modal)
-	modal.show_trick(trick)
+	# S13.8 item 5: pre-resolve pool tokens + substitute {item_name} so the
+	# modal's flavor toast matches what apply_trick_choice will actually
+	# grant/lose. We mutate a deep-duplicated trick dict (no aliasing).
+	var patched: Dictionary = _prepare_trick_for_modal(trick)
+	modal.show_trick(patched)
 	var result: Array = await modal.resolved
 	# result = [trick_id, choice_key]
 	var choice_key: String = String(result[1]) if result.size() >= 2 else "choice_a"
-	game_state.apply_trick_choice(trick, choice_key)
+	game_state.apply_trick_choice(patched, choice_key)
 	modal.queue_free()
 	_build_ui()
+
+## S13.8 item 5 — Duplicate a trick dict and pre-resolve any pool ITEM tokens
+## to concrete direct tokens, then substitute `{item_name}` placeholders in
+## each choice's flavor_line. Returns the patched copy. Leaves the original
+## trick (and any flavor without `{item_name}`) untouched.
+func _prepare_trick_for_modal(trick: Dictionary) -> Dictionary:
+	var patched: Dictionary = trick.duplicate(true)
+	for key in ["choice_a", "choice_b"]:
+		if not patched.has(key):
+			continue
+		var c: Dictionary = patched[key]
+		for field_t in ["effect_type", "effect_type_2"]:
+			if not c.has(field_t):
+				continue
+			var et = c[field_t]
+			if et != TrickChoices.EffectType.ITEM_GRANT and et != TrickChoices.EffectType.ITEM_LOSE:
+				continue
+			var field_v: String = field_t.replace("type", "value")
+			var tok: String = String(c.get(field_v, ""))
+			if tok.begins_with("random_"):
+				var resolved: Dictionary = ItemTokens.resolve_token(tok)
+				if not resolved.is_empty():
+					c[field_v] = String(resolved["token"])
+		c["flavor_line"] = _substitute_item_name(String(c.get("flavor_line", "")), c)
+	return patched
+
+## S13.8 item 5 — Replace `{item_name}` with the display name of the ITEM_GRANT
+## or ITEM_LOSE token on `choice`. Leaves the string unchanged on any miss
+## (no placeholder, non-item effect, unresolvable token). AC5.2: QA catches
+## authoring mistakes because the placeholder stays visible.
+func _substitute_item_name(flavor: String, choice: Dictionary) -> String:
+	if "{item_name}" not in flavor:
+		return flavor
+	var tok: String = ""
+	var et = choice.get("effect_type")
+	var et2 = choice.get("effect_type_2")
+	if et == TrickChoices.EffectType.ITEM_GRANT or et == TrickChoices.EffectType.ITEM_LOSE:
+		tok = String(choice.get("effect_value", ""))
+	elif et2 == TrickChoices.EffectType.ITEM_GRANT or et2 == TrickChoices.EffectType.ITEM_LOSE:
+		tok = String(choice.get("effect_value_2", ""))
+	if tok == "":
+		return flavor
+	var resolved: Dictionary = ItemTokens.resolve_token(tok)
+	var name: String = ItemTokens.display_name(resolved)
+	if name == "":
+		return flavor
+	return flavor.replace("{item_name}", name)
 
 # --- UI construction ---
 

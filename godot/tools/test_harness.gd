@@ -22,6 +22,8 @@ var state_log: Array = []
 var current_screen_name: String = "main_menu"
 var viewport_size := Vector2i(1280, 720)
 
+var json_log_path: String = ""  # S12.5: --json-log <filepath>
+
 # Tick waiting
 var wait_remaining: int = 0
 
@@ -37,10 +39,15 @@ func _initialize() -> void:
 	# Load commands
 	var cmd_path := DEFAULT_COMMANDS
 	var args := OS.get_cmdline_user_args()
-	for arg in args:
-		if arg.ends_with(".json"):
-			cmd_path = arg
-			break
+	var i := 0
+	while i < args.size():
+		if args[i] == "--json-log" and i + 1 < args.size():
+			json_log_path = args[i + 1]
+			i += 2
+			continue
+		if args[i].ends_with(".json"):
+			cmd_path = args[i]
+		i += 1
 
 	var file := FileAccess.open(cmd_path, FileAccess.READ)
 	if file == null:
@@ -206,6 +213,8 @@ func _start_arena_match() -> void:
 
 	# Create sim
 	sim = CombatSim.new(42)  # deterministic seed for testing
+	if json_log_path != "":
+		sim.json_log_enabled = true
 	sim.add_brott(player_brott)
 	sim.add_brott(enemy_brott)
 
@@ -356,6 +365,16 @@ func _log_state(event: String) -> void:
 	})
 
 func _finish() -> void:
+	# S12.5: Write JSON match log if requested
+	if json_log_path != "" and sim != null:
+		var jlog_file := FileAccess.open(json_log_path, FileAccess.WRITE)
+		if jlog_file:
+			jlog_file.store_string(JSON.stringify(sim.get_json_log(), "  "))
+			jlog_file.close()
+			print("JSON match log saved to %s (%d ticks)" % [json_log_path, sim.get_json_log().size()])
+		else:
+			printerr("ERROR: Cannot write JSON log to %s" % json_log_path)
+	
 	# Save state log
 	var file := FileAccess.open(STATE_LOG_PATH, FileAccess.WRITE)
 	if file:

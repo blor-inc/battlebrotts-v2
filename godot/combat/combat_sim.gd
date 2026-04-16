@@ -51,6 +51,11 @@ func _get_sudden_death_ticks() -> int:
 func _get_timeout_ticks() -> int:
 	return MATCH_TIMEOUT_TICKS_1V1 if match_mode == "1v1" else MATCH_TIMEOUT_TICKS_TEAM
 
+# --- JSON match logging (S12.5) ---
+var json_log_enabled: bool = false
+var _json_log: Array = []
+var _tick_events: Array = []  # transient: events for current tick
+
 # --- Instrumentation (S11.2) ---
 var shots_fired: Dictionary = {}   # weapon_name -> int
 var shots_hit: Dictionary = {}     # weapon_name -> int
@@ -70,10 +75,15 @@ func _init(seed_val: int = 0) -> void:
 func add_brott(brott: BrottState) -> void:
 	brotts.append(brott)
 
+func get_json_log() -> Array:
+	return _json_log
+
 func simulate_tick() -> void:
 	if match_over:
 		return
 	tick_count += 1
+	if json_log_enabled:
+		_tick_events = []
 	
 	# Check overtime trigger
 	if not overtime_active and tick_count >= _get_overtime_ticks():
@@ -82,10 +92,14 @@ func simulate_tick() -> void:
 			if b.alive:
 				b.stance = 0  # Force Aggressive
 				b.overtime = true
+		if json_log_enabled:
+			_tick_events.append({"type": "overtime_triggered", "tick": tick_count})
 	
 	# Check sudden death escalation
 	if not sudden_death_active and tick_count >= _get_sudden_death_ticks():
 		sudden_death_active = true
+		if json_log_enabled:
+			_tick_events.append({"type": "sudden_death_triggered", "tick": tick_count})
 
 	# Shrink arena boundary during overtime
 	if overtime_active:
@@ -137,6 +151,9 @@ func simulate_tick() -> void:
 	
 	_update_projectiles()
 	_check_match_end()
+	
+	if json_log_enabled:
+		_append_tick_log()
 
 func _evaluate_brain(b: BrottState) -> void:
 	if b.target == null or not b.target.alive:
@@ -254,6 +271,9 @@ func _activate_module(b: BrottState, module_index: int) -> void:
 	var mdata: Dictionary = ModuleData.get_module(mt)
 	if not mdata["activated"]:
 		return
+	
+	if json_log_enabled:
+		_tick_events.append({"type": "module_activated", "bot_id": b.bot_name, "module": str(mdata.get("name", str(mt)))})
 	
 	var dur_ticks: float = float(mdata.get("duration", 0.0)) * float(TICKS_PER_SEC)
 	b.module_active_timers[module_index] = dur_ticks
@@ -603,6 +623,8 @@ func _fire_weapons(b: BrottState) -> void:
 		# Instrumentation: track shots fired
 		var wname: String = str(wd.get("name", str(wt)))
 		shots_fired[wname] = shots_fired.get(wname, 0) + 1
+		if json_log_enabled:
+			_tick_events.append({"type": "weapon_fired", "bot_id": b.bot_name, "weapon": wname, "target_id": b.target.bot_name})
 		if first_engagement_tick < 0:
 			first_engagement_tick = tick_count
 		
@@ -685,6 +707,8 @@ func _apply_damage(target: BrottState, base_dmg: float, is_crit: bool, source: B
 	if effective > 0:
 		target.hp -= effective
 		target.flash_timer = 3.0
+		if json_log_enabled:
+			_tick_events.append({"type": "damage_dealt", "target_id": target.bot_name, "amount": effective, "is_crit": is_crit})
 		on_damage.emit(target, effective, is_crit, hit_pos)
 		# Instrumentation: track shots hit (by source weapon)
 		if source != null:
@@ -710,6 +734,8 @@ func _kill_brott(b: BrottState) -> void:
 	# Instrumentation: record kill tick
 	if not kill_ticks.has(b.bot_name):
 		kill_ticks[b.bot_name] = tick_count
+	if json_log_enabled:
+		_tick_events.append({"type": "bot_destroyed", "bot_id": b.bot_name, "tick": tick_count})
 	on_death.emit(b)
 
 func _check_match_end() -> void:
@@ -809,6 +835,39 @@ static func batch_regression_summary(results: Array[Dictionary]) -> Dictionary:
 		"avg_ttk_sec": avg_ttk,
 		"avg_hit_rates": avg_hit_rates,
 	}
+
+## --- JSON match log (S12.5) ---
+
+func _get_match_state() -> String:
+	if match_over:
+		return "completed"
+	if sudden_death_active:
+		return "sudden_death"
+	if overtime_active:
+		return "overtime"
+	return "in_progress"
+
+func _append_tick_log() -> void:
+	var bot_states: Array = []
+	for b in brotts:
+		bot_states.append({
+			"id": b.bot_name,
+			"position_x": b.position.x,
+			"position_y": b.position.y,
+			"hp": b.hp,
+			"max_hp": b.max_hp,
+			"energy": b.energy,
+			"current_speed": b.current_speed,
+			"stance": b.stance,
+			"target_id": b.target.bot_name if b.target else "",
+			"facing_angle": b.facing_angle,
+		})
+	_json_log.append({
+		"tick": tick_count,
+		"bots": bot_states,
+		"events": _tick_events,
+		"match_state": _get_match_state(),
+	})
 
 func _team_hp_pct(team: int) -> float:
 	var total_hp: float = 0.0

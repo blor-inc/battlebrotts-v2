@@ -37,7 +37,7 @@ Eric named **Eve from WALL-E** as the UX polish target: *"professional, clean, a
 
 ## 🔵 Feel issues
 
-- **Scout is jerky + too fast.** Eric: "watching mice run around rather than weighty brotts." Both speed and turn rate feel wrong; jerkiness most jarring. Suggest slower accel/decel + lower turn rate.
+- **Scout is jerky — speed is probably fine.** Eric (clarified): *"speed might be okay if movement isn't jerky. i can imagine a fast bot rolling around."* Don't reduce speed cap — **fix smoothing**: turn rate, direction-change lerping, accel/decel curves. Target: Scout can stay fast as long as it moves like a rolling fast thing, not a teleporting fast thing. Prior quote for context (pre-clarification): "watching mice run around rather than weighty brotts."
 - **Scrapyard fight 3 feels long when losing.** "I knew I was going to lose for a long time." Consider concede button and/or shorter fights at low HP.
 
 ## 🟢 BrottBrain cards

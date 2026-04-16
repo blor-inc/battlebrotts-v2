@@ -255,4 +255,17 @@ func build_brott() -> BrottState:
 		b.module_types.append(mt)
 	b.stance = 0  # Default aggressive, brain will override
 	b.setup()
+	# S13.6: Apply pending trick effects accumulated between matches.
+	# HP_DELTA shifts starting hp (and max_hp so the HUD bar matches);
+	# NEXT_FIGHT_PELLET_MOD carries into the BrottState for per-shot application.
+	# Both are single-use: cleared after consumption so they do not leak to
+	# subsequent matches (or to rematches that rebuild the brott).
+	if _pending_hp_delta != 0:
+		var new_max: int = max(1, b.max_hp + _pending_hp_delta)
+		b.max_hp = new_max
+		b.hp = float(new_max)
+		_pending_hp_delta = 0
+	if _next_fight_pellet_mod != 0:
+		b.pellet_mod = _next_fight_pellet_mod
+		_next_fight_pellet_mod = 0
 	return b

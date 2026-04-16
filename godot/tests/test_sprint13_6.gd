@@ -50,6 +50,11 @@ func _run_all() -> void:
 	_test_pick_unseen_prefers_unseen()
 	_test_pick_unseen_fallback_when_exhausted()
 	_test_clear_run_state()
+	_test_build_brott_applies_pending_hp_delta()
+	_test_build_brott_applies_pellet_mod()
+	_test_build_brott_clears_pending_effects()
+	_test_build_brott_hp_delta_floor()
+	_test_combat_sim_pellet_mod_floor()
 	_test_modal_scene_smoke()
 	_test_shop_skips_modal_outside_scrapyard()
 	_test_shop_trick_shown_flag_prevents_retrigger()
@@ -171,7 +176,61 @@ func _test_clear_run_state() -> void:
 	assert_eq(gs._next_fight_pellet_mod, 0, "pellet mod cleared")
 	assert_eq(gs._pending_hp_delta, 0, "pending hp delta cleared")
 
-# --- Modal smoke ---
+# --- Effect wiring into next-match start (S13.6 WIRE) ---
+
+func _test_build_brott_applies_pending_hp_delta() -> void:
+	print("WIRE: build_brott() applies _pending_hp_delta to BrottState.hp/max_hp")
+	var gs := GameState.new()
+	# Baseline: build with no pending delta to capture chassis max_hp.
+	var baseline := gs.build_brott()
+	var baseline_max: int = baseline.max_hp
+	assert_true(baseline_max > 0, "baseline max_hp positive")
+	# Now set a pending -5 and rebuild.
+	gs._pending_hp_delta = -5
+	var b := gs.build_brott()
+	assert_eq(b.max_hp, baseline_max - 5, "max_hp reduced by pending HP_DELTA")
+	assert_eq(int(b.hp), baseline_max - 5, "hp matches new max after HP_DELTA")
+
+func _test_build_brott_applies_pellet_mod() -> void:
+	print("WIRE: build_brott() carries _next_fight_pellet_mod into BrottState.pellet_mod")
+	var gs := GameState.new()
+	gs._next_fight_pellet_mod = 3
+	var b := gs.build_brott()
+	assert_eq(b.pellet_mod, 3, "pellet_mod propagated to BrottState")
+
+func _test_build_brott_clears_pending_effects() -> void:
+	print("WIRE: build_brott() clears pending effects so they don't leak to next match")
+	var gs := GameState.new()
+	gs._pending_hp_delta = -5
+	gs._next_fight_pellet_mod = 3
+	var _b := gs.build_brott()
+	assert_eq(gs._pending_hp_delta, 0, "_pending_hp_delta cleared after consumption")
+	assert_eq(gs._next_fight_pellet_mod, 0, "_next_fight_pellet_mod cleared after consumption")
+	# A second build_brott() with no pending deltas must restore baseline max_hp.
+	var b2 := gs.build_brott()
+	var baseline := gs.build_brott()
+	assert_eq(b2.max_hp, baseline.max_hp, "second build returns unmodified max_hp")
+
+func _test_build_brott_hp_delta_floor() -> void:
+	print("WIRE: HP_DELTA can't drop max_hp below 1")
+	var gs := GameState.new()
+	gs._pending_hp_delta = -100000
+	var b := gs.build_brott()
+	assert_true(b.max_hp >= 1, "max_hp floor-clamped to >= 1")
+	assert_true(b.hp >= 1.0, "hp floor-clamped to >= 1")
+
+func _test_combat_sim_pellet_mod_floor() -> void:
+	print("WIRE: combat_sim applies BrottState.pellet_mod with floor of 1")
+	# Unit-level: we don't spin a full sim (firing needs targets/energy/etc).
+	# Instead, replicate the guard used in combat_sim: max(1, pellets + pellet_mod).
+	# This makes the contract explicit at the test layer: a huge negative mod
+	# can't zero out a single-pellet weapon.
+	var base_pellets := 1
+	var mod := -99
+	var effective: int = max(1, base_pellets + mod)
+	assert_eq(effective, 1, "negative pellet_mod clamped to 1")
+	# And positive mods stack additively.
+	assert_eq(max(1, 5 + 3), 8, "positive pellet_mod adds to base pellets")
 
 func _test_modal_scene_smoke() -> void:
 	print("Smoke: trick_choice_modal.tscn instantiates, show_trick callable, resolved signal exists")

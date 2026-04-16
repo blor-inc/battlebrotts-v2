@@ -97,7 +97,11 @@ func _test_shop_swap_order_in_source() -> void:
 	print("Source: shop_screen.gd places queue_free() before apply_trick_choice()")
 	var src: String = _read_source("res://ui/shop_screen.gd")
 	var qf: int = src.find("modal.queue_free()")
-	var ap: int = src.find("apply_trick_choice(trick, choice_key)")
+	# S13.8 merge: B's patched-dict fix (item 5) renames the first arg from
+	# `trick` to `patched`. Accept either to stay robust across refactors.
+	var ap: int = src.find("apply_trick_choice(patched, choice_key)")
+	if ap == -1:
+		ap = src.find("apply_trick_choice(trick, choice_key)")
 	assert_true(qf != -1, "queue_free call present")
 	assert_true(ap != -1, "apply_trick_choice call present")
 	assert_true(qf != -1 and ap != -1 and qf < ap, "queue_free() precedes apply_trick_choice() (S13.8 swap)")

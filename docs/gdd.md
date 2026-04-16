@@ -574,6 +574,37 @@ Scrapyard-league runs open each shop visit with a one-tap **Trick Choice** from 
 - Good: "Smart. +10 bolts." / "Got 'em. Lost some fur." / "Wise. Boring, but wise."
 - Bad (avoid): "Amazing choice!" / "You can do it!" / anything with an exclamation stack.
 
+**Rematch semantics:** `HP_DELTA` and `NEXT_FIGHT_PELLET_MOD` effects are consumed on `build_brott()` at match start. On rematch, these are already applied and do not re-apply — trick outcomes are one-shot per shop visit. This is intentional.
+
+**BrottBrain voice — expanded style guide (S13.8):**
+
+*Tone pillars:*
+- **Cynical-but-caring.** BrottBrain would rather you not get hurt, but won't stop you. Mentor energy, not parent energy.
+- **Concise.** ≤2 sentences, ideally ≤20 words total. If you need a third sentence, rewrite.
+- **Situational humor.** Dark is fine. Mean isn't. Laugh with the player, not at them.
+- **Voice of experience.** BrottBrain has seen this exact scam / crate / goblin before. It shows.
+- **Present tense, concrete imagery.** "Goblin grunts." "Crate creaks." Not "The entity emits a sound."
+
+*Good examples (pulled from existing tricks):*
+- `"...looks like a crate. Could be good, could be rats."` — `crate_find`. Sets stakes in one hedged sentence.
+- `"Scrap trader. Module for 15 bolts, or a quick haggle."` — `scrap_trader`. Pure situation report, no editorializing.
+- `"Smart. +10 bolts."` — `rusty_launcher.choice_b`. Validates a cautious player without sycophancy.
+- `"Got 'em. Lost some fur. -5 HP."` — `risk_for_reward.choice_a`. Reward and cost in the same breath.
+- `"Wise. Boring, but wise."` — `risk_for_reward.choice_b`. Acknowledges the trade-off with a wink.
+
+*Anti-patterns — do not ship:*
+- **Long exposition.** ❌ `"Back in my day we had to scavenge for weeks to find a working minigun, and even then it'd jam half the time..."` Cut it.
+- **Corporate voice.** ❌ `"You have encountered a vendor NPC. Please select a transaction option."` BrottBrain is not a UX writer.
+- **Direct moral lessons.** ❌ `"This is a good lesson about the value of caution."` Show, don't preach.
+- **Exclamation stacks / hype.** ❌ `"Amazing choice!!!"` / `"You got this!"` BrottBrain doesn't cheerlead.
+- **Modern slang, em-dashes, rhetorical questions.** ❌ `"Bestie, no cap — are we really doing this?"`
+
+*Writing guidance for future trick authors:*
+- Voice BrottBrain as a tired mechanic friend who's seen everything, not a narrator describing events from above.
+- If the line could appear in a tutorial tooltip verbatim, rewrite it — BrottBrain is never explanatory prose.
+- Use `{item_name}` placeholders in `ITEM_GRANT`/`ITEM_LOSE` flavor lines; `shop_screen.gd` substitutes them before the modal shows the toast. Non-item effects leave the literal `{item_name}` visible — that's an authoring bug, not a feature.
+- Rubric for a review pass: 1) Is it ≤2 sentences? 2) Would a tired mechanic say this? 3) Does it avoid the anti-patterns? If any answer is no, rewrite.
+
 ---
 
 ## 12. Player Fantasy

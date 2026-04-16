@@ -252,9 +252,9 @@ func test_timeout_1v1_at_100s() -> void:
 	var sim := CombatSim.new(1)
 	sim.match_mode = "1v1"
 	var a := _make_brott(ChassisData.ChassisType.FORTRESS, 0)
-	a.position = Vector2(64, 64)
+	a.position = Vector2(256, 256)
 	var b := _make_brott(ChassisData.ChassisType.FORTRESS, 1)
-	b.position = Vector2(400, 400)
+	b.position = Vector2(260, 260)
 	sim.add_brott(a)
 	sim.add_brott(b)
 
@@ -268,9 +268,9 @@ func test_timeout_2v2_at_120s() -> void:
 	var sim := CombatSim.new(1)
 	sim.match_mode = "2v2"
 	var a := _make_brott(ChassisData.ChassisType.FORTRESS, 0)
-	a.position = Vector2(64, 64)
+	a.position = Vector2(256, 256)
 	var b := _make_brott(ChassisData.ChassisType.FORTRESS, 1)
-	b.position = Vector2(400, 400)
+	b.position = Vector2(260, 260)
 	sim.add_brott(a)
 	sim.add_brott(b)
 

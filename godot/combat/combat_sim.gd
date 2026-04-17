@@ -532,8 +532,19 @@ func _move_brott(b: BrottState) -> void:
 			b.facing_angle += signf(angle_diff) * max_turn
 		b.facing_angle = fmod(b.facing_angle + 360.0, 360.0)
 	
-	# Bot-bot separation force (S11.1: 32px threshold, 60% base speed)
+	# Bot-bot separation force (S11.1: 32px threshold, 60% base speed).
+	# S15 moonwalk fix: the separation push can have a component opposing
+	# `to_target` (backward). Cap the backward component against the shared
+	# `backup_distance` budget (TILE_SIZE = 1 tile), same budget the TCR retreats
+	# use. Forward/lateral components pass through untouched so overlap resolution
+	# still works. See docs/kb/juke-bypass-movement-caps.md.
 	var sep_threshold: float = TILE_SIZE  # 32px = 1 tile
+	var has_target: bool = b.target != null and b.target.alive
+	var to_target_n: Vector2 = Vector2.ZERO
+	if has_target:
+		var to_target_sep: Vector2 = b.target.position - b.position
+		if to_target_sep.length_squared() > 0.0001:
+			to_target_n = to_target_sep.normalized()
 	for other in brotts:
 		if other == b or not other.alive:
 			continue
@@ -541,7 +552,26 @@ func _move_brott(b: BrottState) -> void:
 		var sep_dist: float = sep.length()
 		if sep_dist < sep_threshold and sep_dist > 0.01:
 			var repulsion_speed: float = b.base_speed * 0.6 * TICK_DELTA
-			b.position += sep.normalized() * repulsion_speed
+			var push: Vector2 = sep.normalized() * repulsion_speed
+			# Only gate the backward component when bots are NOT overlapping hitboxes.
+			# If `sep_dist < 2 * BOT_HITBOX_RADIUS`, we're in actual overlap — the
+			# separation push needs full authority to resolve the overlap (otherwise
+			# overlapping bots linger, the `sep_dist <= 0.01` explosion branch fires,
+			# and commit crossovers happen more often). Once bots are merely "close"
+			# (e.g., 24–32px), gate the backward component against `backup_distance`.
+			var overlap: bool = sep_dist < 2.0 * BOT_HITBOX_RADIUS
+			if not overlap and to_target_n != Vector2.ZERO:
+				var along: float = push.dot(to_target_n)  # <0 means backward
+				var perp_push: Vector2 = push - to_target_n * along
+				if along < 0.0:
+					var remaining_budget: float = maxf(0.0, TILE_SIZE - b.backup_distance)
+					var backward_mag: float = minf(-along, remaining_budget)
+					b.backup_distance += backward_mag
+					b.position += perp_push + to_target_n * (-backward_mag)
+				else:
+					b.position += push
+			else:
+				b.position += push
 		elif sep_dist <= 0.01:
 			b.position += Vector2(TILE_SIZE * 0.5, 0)
 	
@@ -612,7 +642,28 @@ func _check_and_handle_stuck(b: BrottState) -> void:
 		b._unstick_timer -= 1.0
 		var nudge: Vector2 = _wall_escape_direction(b)
 		if nudge != Vector2.ZERO:
-			b.position += nudge * UNSTICK_NUDGE_PX_PER_TICK
+			# S15 moonwalk fix: clamp the backward component of the unstick nudge
+			# against the shared `backup_distance` budget (TILE_SIZE). The escape
+			# direction can resolve to a backward vector when no clear wall/pillar
+			# signal is available; without this gate, the nudge is a 7px/tick
+			# unclamped retreat source. Forward/lateral components pass through
+			# untouched — the unstick maneuver's job is to escape geometry, not to
+			# out-retreat the moonwalk invariant. See docs/kb/juke-bypass-movement-caps.md.
+			var push: Vector2 = nudge * UNSTICK_NUDGE_PX_PER_TICK
+			var to_target_u: Vector2 = b.target.position - b.position
+			if to_target_u.length_squared() > 0.0001:
+				var to_target_n: Vector2 = to_target_u.normalized()
+				var along: float = push.dot(to_target_n)
+				var perp_push: Vector2 = push - to_target_n * along
+				if along < 0.0:
+					var remaining_budget: float = maxf(0.0, TILE_SIZE - b.backup_distance)
+					var backward_mag: float = minf(-along, remaining_budget)
+					b.backup_distance += backward_mag
+					b.position += perp_push + to_target_n * (-backward_mag)
+				else:
+					b.position += push
+			else:
+				b.position += push
 			var arena_px2: float = 16.0 * TILE_SIZE
 			b.position.x = clampf(b.position.x, BOT_HITBOX_RADIUS, arena_px2 - BOT_HITBOX_RADIUS)
 			b.position.y = clampf(b.position.y, BOT_HITBOX_RADIUS, arena_px2 - BOT_HITBOX_RADIUS)

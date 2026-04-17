@@ -1,0 +1,35 @@
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== BattleBrotts Sprint 11.2 Test Suite ===
+=== Juke Bugfix + Instrumentation ===
+
+
+-- Away Juke Cap (direct test) --
+  PASS: backup_distance capped: 0.0 px (max 32)
+
+-- Away Juke Cap (100 seeds) --
+  PASS: No moonwalk violations (0/100)
+
+-- Hit Rate Instrumentation --
+  PASS: Hit rates recorded for 1 weapon(s)
+  PASS: Hit rate for Plasma Cutter: 0.42 (valid range)
+  PASS: Total shots fired: 38 (>0)
+
+-- TTK Instrumentation --
+  PASS: First engagement tick recorded: 9
+  PASS: TTK recorded for 1 bot(s)
+  PASS: TTK for Scout_1: 9.1s (non-negative)
+
+-- Regression Summary --
+  PASS: Batch has 20 sims
+  PASS: Batch has win_rates
+  PASS: Batch has avg_ttk_sec: 10.5s
+  PASS: Batch has avg_hit_rates
+  Regression baseline: { "total_sims": 20, "win_rates": { 0: 8, 1: 12 }, "avg_ttk_sec": 10.53, "avg_hit_rates": { "Plasma Cutter": 0.46997191299655 } }
+
+--- Results ---
+12 passed, 0 failed out of 12
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2378)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:614)

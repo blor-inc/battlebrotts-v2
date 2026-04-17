@@ -86,12 +86,19 @@ func test_away_juke_cap_across_seeds() -> void:
 		for _t in range(300):
 			if sim.match_over:
 				break
+			# Sample target direction BEFORE the tick — intent frame.
+			# Per Gizmo's S15.2 ruling (docs/design/sprint15-moonwalk-metric-ruling.md):
+			# the moonwalk invariant measures intent to retreat, not post-tick net
+			# displacement. Post-tick sampling produces false positives when two bots
+			# COMMIT-dash through each other in a single tick (flipped frame).
+			var to_target_pre: Vector2 = Vector2.ZERO
+			if b0.alive and b0.target != null:
+				to_target_pre = b0.target.position - b0.position
 			sim.simulate_tick()
 			if b0.alive and b0.target != null:
-				var to_target: Vector2 = b0.target.position - b0.position
 				var movement: Vector2 = b0.position - prev_pos
-				if to_target.length() > 0.1 and movement.length() > 0.1:
-					var dot: float = movement.normalized().dot(to_target.normalized())
+				if to_target_pre.length() > 0.1 and movement.length() > 0.1:
+					var dot: float = movement.normalized().dot(to_target_pre.normalized())
 					if dot < -0.7:
 						backup_run += movement.length()
 					else:

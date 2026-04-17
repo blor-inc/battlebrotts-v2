@@ -44,12 +44,15 @@ func _scan_all_seeds() -> void:
 		for t in range(300):
 			if sim.match_over:
 				break
+			# Pre-tick sampling per S15.2 ruling (intent frame).
+			var tt_pre: Vector2 = Vector2.ZERO
+			if b0.alive and b0.target != null:
+				tt_pre = b0.target.position - b0.position
 			sim.simulate_tick()
 			if b0.alive and b0.target != null:
-				var tt: Vector2 = b0.target.position - b0.position
 				var mv: Vector2 = b0.position - prev_pos
-				if tt.length() > 0.1 and mv.length() > 0.1:
-					var dot: float = mv.normalized().dot(tt.normalized())
+				if tt_pre.length() > 0.1 and mv.length() > 0.1:
+					var dot: float = mv.normalized().dot(tt_pre.normalized())
 					if dot < -0.7:
 						backup_run += mv.length()
 						if backup_run > max_run: max_run = backup_run
@@ -77,14 +80,17 @@ func _trace_seed(seed_val: int) -> void:
 	for t in range(120):
 		if sim.match_over:
 			break
+		# Pre-tick sampling per S15.2 ruling (intent frame).
+		var tt_pre: Vector2 = Vector2.ZERO
+		if b0.alive and b0.target != null:
+			tt_pre = b0.target.position - b0.position
 		sim.simulate_tick()
 		if not (b0.alive and b0.target != null):
 			continue
-		var tt: Vector2 = b0.target.position - b0.position
 		var mv: Vector2 = b0.position - prev_pos
 		var dot := 0.0
-		if tt.length() > 0.1 and mv.length() > 0.1:
-			dot = mv.normalized().dot(tt.normalized())
+		if tt_pre.length() > 0.1 and mv.length() > 0.1:
+			dot = mv.normalized().dot(tt_pre.normalized())
 			if dot < -0.7:
 				backup_run += mv.length()
 			else:

@@ -1,0 +1,464 @@
+﻿2026-04-17T17:15:47.5891162Z Current runner version: '2.333.1'
+2026-04-17T17:15:47.5917423Z ##[group]Runner Image Provisioner
+2026-04-17T17:15:47.5918242Z Hosted Compute Agent
+2026-04-17T17:15:47.5918812Z Version: 20260213.493
+2026-04-17T17:15:47.5919388Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+2026-04-17T17:15:47.5920132Z Build Date: 2026-02-13T00:28:41Z
+2026-04-17T17:15:47.5920784Z Worker ID: {e7ee706e-f43f-4f7f-9859-d734e3d32c55}
+2026-04-17T17:15:47.5921544Z Azure Region: centralus
+2026-04-17T17:15:47.5922151Z ##[endgroup]
+2026-04-17T17:15:47.5924194Z ##[group]Operating System
+2026-04-17T17:15:47.5925218Z Ubuntu
+2026-04-17T17:15:47.5925639Z 24.04.4
+2026-04-17T17:15:47.5926217Z LTS
+2026-04-17T17:15:47.5926690Z ##[endgroup]
+2026-04-17T17:15:47.5927187Z ##[group]Runner Image
+2026-04-17T17:15:47.5927764Z Image: ubuntu-24.04
+2026-04-17T17:15:47.5928348Z Version: 20260413.86.1
+2026-04-17T17:15:47.5929565Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260413.86/images/ubuntu/Ubuntu2404-Readme.md
+2026-04-17T17:15:47.5931012Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260413.86
+2026-04-17T17:15:47.5931883Z ##[endgroup]
+2026-04-17T17:15:47.5935144Z ##[group]GITHUB_TOKEN Permissions
+2026-04-17T17:15:47.5937393Z Actions: write
+2026-04-17T17:15:47.5938044Z ArtifactMetadata: write
+2026-04-17T17:15:47.5938607Z Attestations: write
+2026-04-17T17:15:47.5939141Z Checks: write
+2026-04-17T17:15:47.5939737Z Contents: write
+2026-04-17T17:15:47.5940223Z Deployments: write
+2026-04-17T17:15:47.5940764Z Discussions: write
+2026-04-17T17:15:47.5941257Z Issues: write
+2026-04-17T17:15:47.5941813Z Metadata: read
+2026-04-17T17:15:47.5942269Z Models: read
+2026-04-17T17:15:47.5942791Z Packages: write
+2026-04-17T17:15:47.5943275Z Pages: write
+2026-04-17T17:15:47.5943857Z PullRequests: write
+2026-04-17T17:15:47.5944438Z RepositoryProjects: write
+2026-04-17T17:15:47.5945200Z SecurityEvents: write
+2026-04-17T17:15:47.5945743Z Statuses: write
+2026-04-17T17:15:47.5946214Z ##[endgroup]
+2026-04-17T17:15:47.5948419Z Secret source: Actions
+2026-04-17T17:15:47.5949458Z Prepare workflow directory
+2026-04-17T17:15:47.6278874Z Prepare all required actions
+2026-04-17T17:15:47.6319550Z Getting action download info
+2026-04-17T17:15:47.9639317Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-04-17T17:15:48.1915435Z Complete job name: Godot Unit Tests
+2026-04-17T17:15:48.2583781Z ##[group]Run actions/checkout@v4
+2026-04-17T17:15:48.2584809Z with:
+2026-04-17T17:15:48.2585231Z   repository: brott-studio/battlebrotts-v2
+2026-04-17T17:15:48.2585944Z   token: ***
+2026-04-17T17:15:48.2586332Z   ssh-strict: true
+2026-04-17T17:15:48.2586726Z   ssh-user: git
+2026-04-17T17:15:48.2587118Z   persist-credentials: true
+2026-04-17T17:15:48.2587558Z   clean: true
+2026-04-17T17:15:48.2587948Z   sparse-checkout-cone-mode: true
+2026-04-17T17:15:48.2588430Z   fetch-depth: 1
+2026-04-17T17:15:48.2588803Z   fetch-tags: false
+2026-04-17T17:15:48.2589195Z   show-progress: true
+2026-04-17T17:15:48.2589605Z   lfs: false
+2026-04-17T17:15:48.2589969Z   submodules: false
+2026-04-17T17:15:48.2590366Z   set-safe-directory: true
+2026-04-17T17:15:48.2590993Z ##[endgroup]
+2026-04-17T17:15:48.3665404Z Syncing repository: brott-studio/battlebrotts-v2
+2026-04-17T17:15:48.3667267Z ##[group]Getting Git version info
+2026-04-17T17:15:48.3668070Z Working directory is '/home/runner/work/battlebrotts-v2/battlebrotts-v2'
+2026-04-17T17:15:48.3669071Z [command]/usr/bin/git version
+2026-04-17T17:15:48.3715688Z git version 2.53.0
+2026-04-17T17:15:48.3740272Z ##[endgroup]
+2026-04-17T17:15:48.3755346Z Temporarily overriding HOME='/home/runner/work/_temp/f49edd30-b114-433b-a469-066ae7bca38d' before making global git config changes
+2026-04-17T17:15:48.3756693Z Adding repository directory to the temporary git global config as a safe directory
+2026-04-17T17:15:48.3762105Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/battlebrotts-v2/battlebrotts-v2
+2026-04-17T17:15:48.3794368Z Deleting the contents of '/home/runner/work/battlebrotts-v2/battlebrotts-v2'
+2026-04-17T17:15:48.3798137Z ##[group]Initializing the repository
+2026-04-17T17:15:48.3802090Z [command]/usr/bin/git init /home/runner/work/battlebrotts-v2/battlebrotts-v2
+2026-04-17T17:15:48.3876194Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-04-17T17:15:48.3878041Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-04-17T17:15:48.3879521Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-04-17T17:15:48.3880654Z hint: call:
+2026-04-17T17:15:48.3881267Z hint:
+2026-04-17T17:15:48.3882033Z hint: 	git config --global init.defaultBranch <name>
+2026-04-17T17:15:48.3882977Z hint:
+2026-04-17T17:15:48.3883880Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-04-17T17:15:48.3885557Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-04-17T17:15:48.3886698Z hint:
+2026-04-17T17:15:48.3887332Z hint: 	git branch -m <name>
+2026-04-17T17:15:48.3888066Z hint:
+2026-04-17T17:15:48.3889014Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-04-17T17:15:48.3890695Z Initialized empty Git repository in /home/runner/work/battlebrotts-v2/battlebrotts-v2/.git/
+2026-04-17T17:15:48.3893405Z [command]/usr/bin/git remote add origin https://github.com/brott-studio/battlebrotts-v2
+2026-04-17T17:15:48.3921582Z ##[endgroup]
+2026-04-17T17:15:48.3922711Z ##[group]Disabling automatic garbage collection
+2026-04-17T17:15:48.3926552Z [command]/usr/bin/git config --local gc.auto 0
+2026-04-17T17:15:48.3955630Z ##[endgroup]
+2026-04-17T17:15:48.3956727Z ##[group]Setting up auth
+2026-04-17T17:15:48.3962947Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-04-17T17:15:48.3993967Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-04-17T17:15:48.4289366Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-04-17T17:15:48.4321591Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-04-17T17:15:48.4550506Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-04-17T17:15:48.4579782Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-04-17T17:15:48.4808258Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-04-17T17:15:48.4842432Z ##[endgroup]
+2026-04-17T17:15:48.4843234Z ##[group]Fetching the repository
+2026-04-17T17:15:48.4850940Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +138cc247b28af19bce1ef8cacbb1d4a04af5934d:refs/remotes/pull/84/merge
+2026-04-17T17:15:48.9470887Z From https://github.com/brott-studio/battlebrotts-v2
+2026-04-17T17:15:48.9472002Z  * [new ref]         138cc247b28af19bce1ef8cacbb1d4a04af5934d -> pull/84/merge
+2026-04-17T17:15:48.9500658Z ##[endgroup]
+2026-04-17T17:15:48.9501424Z ##[group]Determining the checkout info
+2026-04-17T17:15:48.9502725Z ##[endgroup]
+2026-04-17T17:15:48.9508153Z [command]/usr/bin/git sparse-checkout disable
+2026-04-17T17:15:48.9552722Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-04-17T17:15:48.9578618Z ##[group]Checking out the ref
+2026-04-17T17:15:48.9581957Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/84/merge
+2026-04-17T17:15:48.9821895Z Note: switching to 'refs/remotes/pull/84/merge'.
+2026-04-17T17:15:48.9822470Z 
+2026-04-17T17:15:48.9822886Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-04-17T17:15:48.9823825Z changes and commit them, and you can discard any commits you make in this
+2026-04-17T17:15:48.9825310Z state without impacting any branches by switching back to a branch.
+2026-04-17T17:15:48.9826228Z 
+2026-04-17T17:15:48.9826858Z If you want to create a new branch to retain commits you create, you may
+2026-04-17T17:15:48.9828291Z do so (now or later) by using -c with the switch command. Example:
+2026-04-17T17:15:48.9829119Z 
+2026-04-17T17:15:48.9829505Z   git switch -c <new-branch-name>
+2026-04-17T17:15:48.9830091Z 
+2026-04-17T17:15:48.9830429Z Or undo this operation with:
+2026-04-17T17:15:48.9830960Z 
+2026-04-17T17:15:48.9831266Z   git switch -
+2026-04-17T17:15:48.9831740Z 
+2026-04-17T17:15:48.9832401Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-04-17T17:15:48.9833371Z 
+2026-04-17T17:15:48.9834479Z HEAD is now at 138cc24 Merge fef5211d5ab6b482fba38f8eb1586fba0c2eb65a into 632425c82469d7da9ec25287f91d2b52d6fb3580
+2026-04-17T17:15:48.9837994Z ##[endgroup]
+2026-04-17T17:15:48.9868480Z [command]/usr/bin/git log -1 --format=%H
+2026-04-17T17:15:48.9890749Z 138cc247b28af19bce1ef8cacbb1d4a04af5934d
+2026-04-17T17:15:49.0146642Z ##[group]Run wget -q https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip
+2026-04-17T17:15:49.0148371Z [36;1mwget -q https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip[0m
+2026-04-17T17:15:49.0149510Z [36;1munzip -q Godot_v4.4.1-stable_linux.x86_64.zip[0m
+2026-04-17T17:15:49.0150162Z [36;1mchmod +x Godot_v4.4.1-stable_linux.x86_64[0m
+2026-04-17T17:15:49.0150905Z [36;1msudo mv Godot_v4.4.1-stable_linux.x86_64 /usr/local/bin/godot[0m
+2026-04-17T17:15:49.0177490Z shell: /usr/bin/bash -e {0}
+2026-04-17T17:15:49.0178012Z ##[endgroup]
+2026-04-17T17:15:50.8066009Z ##[group]Run godot --headless --path godot/ --import 2>&1 || true
+2026-04-17T17:15:50.8066534Z [36;1mgodot --headless --path godot/ --import 2>&1 || true[0m
+2026-04-17T17:15:50.8090480Z shell: /usr/bin/bash -e {0}
+2026-04-17T17:15:50.8090801Z ##[endgroup]
+2026-04-17T17:15:50.9713895Z Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+2026-04-17T17:15:50.9889624Z 
+2026-04-17T17:15:59.6155357Z first_scan_filesystem: begin: Project initialization steps: 5
+2026-04-17T17:15:59.6156122Z 	first_scan_filesystem: step 0: Scanning file structure...
+2026-04-17T17:15:59.6163427Z 	first_scan_filesystem: step 1: Loading global class names...
+2026-04-17T17:15:59.6238218Z 	first_scan_filesystem: step 2: Verifying GDExtensions...
+2026-04-17T17:15:59.6246738Z 	first_scan_filesystem: step 3: Creating autoload scripts...
+2026-04-17T17:15:59.6247372Z 	first_scan_filesystem: step 4: Initializing plugins...
+2026-04-17T17:15:59.6248033Z 	first_scan_filesystem: step 5: Starting file scan...
+2026-04-17T17:15:59.6248505Z first_scan_filesystem: end
+2026-04-17T17:15:59.9465121Z update_scripts_classes: begin: Registering global classes... steps: 59
+2026-04-17T17:15:59.9465862Z 	update_scripts_classes: step 0: 
+2026-04-17T17:15:59.9466476Z 	update_scripts_classes: step 1: CharmAnims
+2026-04-17T17:15:59.9466944Z 	update_scripts_classes: step 2: BrottBrain
+2026-04-17T17:15:59.9467412Z 	update_scripts_classes: step 3: BrottState
+2026-04-17T17:15:59.9467896Z 	update_scripts_classes: step 4: CombatSim
+2026-04-17T17:15:59.9471266Z 	update_scripts_classes: step 5: Projectile
+2026-04-17T17:15:59.9477416Z 	update_scripts_classes: step 6: ArmorData
+2026-04-17T17:15:59.9477965Z 	update_scripts_classes: step 7: ChassisData
+2026-04-17T17:15:59.9478468Z 	update_scripts_classes: step 8: ItemTokens
+2026-04-17T17:15:59.9478961Z 	update_scripts_classes: step 9: ModuleData
+2026-04-17T17:15:59.9479450Z 	update_scripts_classes: step 10: OpponentLoadouts
+2026-04-17T17:15:59.9479988Z 	update_scripts_classes: step 11: TrickChoices
+2026-04-17T17:15:59.9480464Z 	update_scripts_classes: step 12: WeaponData
+2026-04-17T17:15:59.9480931Z 	update_scripts_classes: step 13: GameFlow
+2026-04-17T17:15:59.9481418Z 	update_scripts_classes: step 14: GameState
+2026-04-17T17:15:59.9482332Z 	update_scripts_classes: step 15: OpponentData
+2026-04-17T17:15:59.9482843Z 	update_scripts_classes: step 16: 
+2026-04-17T17:15:59.9483263Z 	update_scripts_classes: step 17: 
+2026-04-17T17:15:59.9483711Z 	update_scripts_classes: step 18: 
+2026-04-17T17:15:59.9484120Z 	update_scripts_classes: step 19: 
+2026-04-17T17:15:59.9484779Z 	update_scripts_classes: step 20: 
+2026-04-17T17:15:59.9485184Z 	update_scripts_classes: step 21: 
+2026-04-17T17:15:59.9485591Z 	update_scripts_classes: step 22: 
+2026-04-17T17:15:59.9485997Z 	update_scripts_classes: step 23: 
+2026-04-17T17:15:59.9486405Z 	update_scripts_classes: step 24: 
+2026-04-17T17:15:59.9486798Z 	update_scripts_classes: step 25: 
+2026-04-17T17:15:59.9487208Z 	update_scripts_classes: step 26: 
+2026-04-17T17:15:59.9487614Z 	update_scripts_classes: step 27: 
+2026-04-17T17:15:59.9488025Z 	update_scripts_classes: step 28: 
+2026-04-17T17:15:59.9488434Z 	update_scripts_classes: step 29: 
+2026-04-17T17:15:59.9488833Z 	update_scripts_classes: step 30: 
+2026-04-17T17:15:59.9489246Z 	update_scripts_classes: step 31: 
+2026-04-17T17:15:59.9489642Z 	update_scripts_classes: step 32: 
+2026-04-17T17:15:59.9490043Z 	update_scripts_classes: step 33: 
+2026-04-17T17:15:59.9490443Z 	update_scripts_classes: step 34: 
+2026-04-17T17:15:59.9490854Z 	update_scripts_classes: step 35: 
+2026-04-17T17:15:59.9491252Z 	update_scripts_classes: step 36: 
+2026-04-17T17:15:59.9491660Z 	update_scripts_classes: step 37: 
+2026-04-17T17:15:59.9492049Z 	update_scripts_classes: step 38: 
+2026-04-17T17:15:59.9492459Z 	update_scripts_classes: step 39: 
+2026-04-17T17:15:59.9492864Z 	update_scripts_classes: step 40: 
+2026-04-17T17:15:59.9493255Z 	update_scripts_classes: step 41: 
+2026-04-17T17:15:59.9493645Z 	update_scripts_classes: step 42: 
+2026-04-17T17:15:59.9494337Z 	update_scripts_classes: step 43: 
+2026-04-17T17:15:59.9494965Z 	update_scripts_classes: step 44: 
+2026-04-17T17:15:59.9495354Z 	update_scripts_classes: step 45: 
+2026-04-17T17:15:59.9495757Z 	update_scripts_classes: step 46: 
+2026-04-17T17:15:59.9496147Z 	update_scripts_classes: step 47: 
+2026-04-17T17:15:59.9496593Z 	update_scripts_classes: step 48: BotPreview
+2026-04-17T17:15:59.9497113Z 	update_scripts_classes: step 49: BrottBrainScreen
+2026-04-17T17:15:59.9497673Z 	update_scripts_classes: step 50: LeagueCompleteModal
+2026-04-17T17:15:59.9498231Z 	update_scripts_classes: step 51: LoadoutScreen
+2026-04-17T17:15:59.9498759Z 	update_scripts_classes: step 52: MainMenuScreen
+2026-04-17T17:15:59.9499314Z 	update_scripts_classes: step 53: OpponentSelectScreen
+2026-04-17T17:15:59.9499862Z 	update_scripts_classes: step 54: ResultScreen
+2026-04-17T17:15:59.9500358Z 	update_scripts_classes: step 55: ShopScreen
+2026-04-17T17:15:59.9500811Z 	update_scripts_classes: step 56: 
+2026-04-17T17:15:59.9501240Z 	update_scripts_classes: step 57: 
+2026-04-17T17:15:59.9501650Z 	update_scripts_classes: step 58: 
+2026-04-17T17:15:59.9502048Z update_scripts_classes: end
+2026-04-17T17:15:59.9502604Z _update_scan_actions: begin: Scanning actions... steps: 5
+2026-04-17T17:15:59.9503214Z 	_update_scan_actions: step 0: 01-main-menu.png
+2026-04-17T17:15:59.9503713Z 	_update_scan_actions: step 1: 02-shop.png
+2026-04-17T17:15:59.9504177Z 	_update_scan_actions: step 2: 03-loadout.png
+2026-04-17T17:15:59.9505561Z 	_update_scan_actions: step 3: 04-arena-mid-battle.png
+2026-04-17T17:15:59.9506207Z 	_update_scan_actions: step 4: 05-arena-late-battle.png
+2026-04-17T17:15:59.9506708Z _update_scan_actions: end
+2026-04-17T17:15:59.9507133Z reimport: begin: (Re)Importing Assets steps: 5
+2026-04-17T17:15:59.9507659Z 	reimport: step 0: Preparing files to reimport...
+2026-04-17T17:15:59.9508188Z 	reimport: step 1: Preparing files to reimport...
+2026-04-17T17:15:59.9508710Z 	reimport: step 2: Preparing files to reimport...
+2026-04-17T17:15:59.9509234Z 	reimport: step 3: Preparing files to reimport...
+2026-04-17T17:15:59.9509753Z 	reimport: step 4: Preparing files to reimport...
+2026-04-17T17:15:59.9510307Z 	reimport: step 0: Executing pre-reimport operations...
+2026-04-17T17:15:59.9511032Z 	reimport: step 0: 01-main-menu.png
+2026-04-17T17:15:59.9740035Z 	reimport: step 1: 02-shop.png
+2026-04-17T17:15:59.9744232Z 	reimport: step 2: 03-loadout.png
+2026-04-17T17:15:59.9818993Z 	reimport: step 3: 04-arena-mid-battle.png
+2026-04-17T17:15:59.9933273Z 	reimport: step 4: 05-arena-late-battle.png
+2026-04-17T17:15:59.9948650Z 	reimport: step 5: Finalizing Asset Import...
+2026-04-17T17:15:59.9952017Z reimport: end
+2026-04-17T17:15:59.9952576Z update_script_paths_documentation: begin: Updating scripts documentation steps: 59
+2026-04-17T17:16:00.0196455Z SCRIPT ERROR: Parse Error: The variable type is being inferred from a Variant value, so it will be typed as Variant. (Warning treated as error.)
+2026-04-17T17:16:00.0202826Z           at: GDScript::reload (res://arena/arena_renderer.gd:463)
+2026-04-17T17:16:00.0210818Z ERROR: Failed to load script "res://arena/arena_renderer.gd" with error "Parse error".
+2026-04-17T17:16:00.0211543Z    at: load (modules/gdscript/gdscript.cpp:3022)
+2026-04-17T17:16:00.0212638Z 	update_script_paths_documentation: step 0: arena_renderer.gd
+2026-04-17T17:16:00.0340498Z 	update_script_paths_documentation: step 1: charm_anims.gd
+2026-04-17T17:16:00.0413668Z 	update_script_paths_documentation: step 2: brottbrain.gd
+2026-04-17T17:16:00.0414384Z 	update_script_paths_documentation: step 3: brott_state.gd
+2026-04-17T17:16:00.0818608Z 	update_script_paths_documentation: step 4: combat_sim.gd
+2026-04-17T17:16:00.0819243Z 	update_script_paths_documentation: step 5: projectile.gd
+2026-04-17T17:16:00.0819829Z 	update_script_paths_documentation: step 6: armor_data.gd
+2026-04-17T17:16:00.0820371Z 	update_script_paths_documentation: step 7: chassis_data.gd
+2026-04-17T17:16:00.0866084Z 	update_script_paths_documentation: step 8: item_tokens.gd
+2026-04-17T17:16:00.0867247Z 	update_script_paths_documentation: step 9: module_data.gd
+2026-04-17T17:16:00.0917016Z 	update_script_paths_documentation: step 10: opponent_loadouts.gd
+2026-04-17T17:16:00.0931565Z 	update_script_paths_documentation: step 11: trick_choices.gd
+2026-04-17T17:16:00.0932296Z 	update_script_paths_documentation: step 12: weapon_data.gd
+2026-04-17T17:16:00.1066811Z 	update_script_paths_documentation: step 13: game_flow.gd
+2026-04-17T17:16:00.1067506Z 	update_script_paths_documentation: step 14: game_state.gd
+2026-04-17T17:16:00.1147370Z 	update_script_paths_documentation: step 15: opponent_data.gd
+2026-04-17T17:16:00.1279780Z 	update_script_paths_documentation: step 16: debug_moonwalk.gd
+2026-04-17T17:16:00.1412064Z 	update_script_paths_documentation: step 17: combat_batch.gd
+2026-04-17T17:16:00.1569474Z 	update_script_paths_documentation: step 18: combat_batch_brain.gd
+2026-04-17T17:16:00.1795619Z 	update_script_paths_documentation: step 19: pacing_verify.gd
+2026-04-17T17:16:00.2018408Z 	update_script_paths_documentation: step 20: test_runner.gd
+2026-04-17T17:16:00.2155637Z 	update_script_paths_documentation: step 21: test_s13_2_validation.gd
+2026-04-17T17:16:00.2269128Z 	update_script_paths_documentation: step 22: test_sprint3.gd
+2026-04-17T17:16:00.2553461Z 	update_script_paths_documentation: step 23: test_sprint4.gd
+2026-04-17T17:16:00.2662540Z 	update_script_paths_documentation: step 24: test_sprint5.gd
+2026-04-17T17:16:00.2800368Z 	update_script_paths_documentation: step 25: test_sprint6.gd
+2026-04-17T17:16:00.2881484Z SCRIPT ERROR: Parse Error: Cannot infer the type of "d" variable because the value doesn't have a set type.
+2026-04-17T17:16:00.2882246Z           at: GDScript::reload (res://tests/test_sprint10.gd:87)
+2026-04-17T17:16:00.2887176Z ERROR: Failed to load script "res://tests/test_sprint10.gd" with error "Parse error".
+2026-04-17T17:16:00.2887660Z    at: load (modules/gdscript/gdscript.cpp:3022)
+2026-04-17T17:16:00.2889608Z 	update_script_paths_documentation: step 26: test_sprint10.gd
+2026-04-17T17:16:00.3054941Z 	update_script_paths_documentation: step 27: test_sprint11.gd
+2026-04-17T17:16:00.3201903Z 	update_script_paths_documentation: step 28: test_sprint11_2.gd
+2026-04-17T17:16:00.3372253Z 	update_script_paths_documentation: step 29: test_sprint12_1.gd
+2026-04-17T17:16:00.3661199Z 	update_script_paths_documentation: step 30: test_sprint12_2.gd
+2026-04-17T17:16:00.3772573Z 	update_script_paths_documentation: step 31: test_sprint12_3.gd
+2026-04-17T17:16:00.3970061Z 	update_script_paths_documentation: step 32: test_sprint12_4.gd
+2026-04-17T17:16:00.4109272Z 	update_script_paths_documentation: step 33: test_sprint12_5.gd
+2026-04-17T17:16:00.4389072Z 	update_script_paths_documentation: step 34: test_sprint13_2.gd
+2026-04-17T17:16:00.4470712Z 	update_script_paths_documentation: step 35: test_sprint13_3.gd
+2026-04-17T17:16:00.4794979Z 	update_script_paths_documentation: step 36: test_sprint13_4.gd
+2026-04-17T17:16:00.4914415Z 	update_script_paths_documentation: step 37: test_sprint13_5.gd
+2026-04-17T17:16:00.5060292Z 	update_script_paths_documentation: step 38: test_sprint13_6.gd
+2026-04-17T17:16:00.5197117Z 	update_script_paths_documentation: step 39: test_sprint13_7.gd
+2026-04-17T17:16:00.5253026Z 	update_script_paths_documentation: step 40: test_sprint13_8_modal_hardening.gd
+2026-04-17T17:16:00.5353738Z 	update_script_paths_documentation: step 41: test_sprint13_8_toast.gd
+2026-04-17T17:16:00.5471527Z 	update_script_paths_documentation: step 42: test_sprint13_9.gd
+2026-04-17T17:16:00.5543193Z 	update_script_paths_documentation: step 43: test_sprint13_10.gd
+2026-04-17T17:16:00.5600513Z 	update_script_paths_documentation: step 44: test_sprint14_1.gd
+2026-04-17T17:16:00.5738694Z 	update_script_paths_documentation: step 45: test_sprint14_1_nav.gd
+2026-04-17T17:16:00.5870163Z 	update_script_paths_documentation: step 46: validate_s13_3.gd
+2026-04-17T17:16:00.6378130Z 	update_script_paths_documentation: step 47: test_harness.gd
+2026-04-17T17:16:00.6379247Z 	update_script_paths_documentation: step 48: bot_preview.gd
+2026-04-17T17:16:00.6380088Z 	update_script_paths_documentation: step 49: brottbrain_screen.gd
+2026-04-17T17:16:00.6421992Z 	update_script_paths_documentation: step 50: league_complete_modal.gd
+2026-04-17T17:16:00.6422735Z 	update_script_paths_documentation: step 51: loadout_screen.gd
+2026-04-17T17:16:00.6423408Z 	update_script_paths_documentation: step 52: main_menu_screen.gd
+2026-04-17T17:16:00.6424077Z 	update_script_paths_documentation: step 53: opponent_select_screen.gd
+2026-04-17T17:16:00.6424909Z 	update_script_paths_documentation: step 54: result_screen.gd
+2026-04-17T17:16:00.6425502Z 	update_script_paths_documentation: step 55: shop_screen.gd
+2026-04-17T17:16:00.6443106Z 	update_script_paths_documentation: step 56: trick_choice_modal.gd
+2026-04-17T17:16:00.6782035Z 	update_script_paths_documentation: step 57: game_main.gd
+2026-04-17T17:16:00.6951550Z 	update_script_paths_documentation: step 58: main.gd
+2026-04-17T17:16:00.6952088Z update_script_paths_documentation: end
+2026-04-17T17:16:00.6959284Z reimport: begin: (Re)Importing Assets steps: 5
+2026-04-17T17:16:00.6959841Z 	reimport: step 0: Executing post-reimport operations...
+2026-04-17T17:16:00.6960312Z reimport: end
+2026-04-17T17:16:00.6985151Z loading_editor_layout: begin: Loading editor steps: 5
+2026-04-17T17:16:00.6985815Z 	loading_editor_layout: step 0: Loading editor layout...
+2026-04-17T17:16:00.6986263Z loading_editor_layout: end
+2026-04-17T17:16:02.1247957Z ##[group]Run set -e
+2026-04-17T17:16:02.1248222Z [36;1mset -e[0m
+2026-04-17T17:16:02.1248575Z [36;1mgodot --headless --path godot/ --script res://tests/test_runner.gd[0m
+2026-04-17T17:16:02.1249104Z [36;1m# Glob-based discovery: picks up test_sprint*.gd automatically (S13.8).[0m
+2026-04-17T17:16:02.1249658Z [36;1m# Pattern excludes fixture/helper files (combat_batch.gd, pacing_verify.gd, etc.).[0m
+2026-04-17T17:16:02.1250197Z [36;1mfor f in godot/tests/test_sprint1[0-9]_*.gd godot/tests/test_sprint1[0-9].gd; do[0m
+2026-04-17T17:16:02.1250589Z [36;1m  [ -e "$f" ] || continue[0m
+2026-04-17T17:16:02.1250820Z [36;1m  name="$(basename "$f")"[0m
+2026-04-17T17:16:02.1251055Z [36;1m  echo "Running $name"[0m
+2026-04-17T17:16:02.1251403Z [36;1m  godot --headless --path godot/ --script "res://tests/$name" || exit 1[0m
+2026-04-17T17:16:02.1251939Z [36;1mdone[0m
+2026-04-17T17:16:02.1274351Z shell: /usr/bin/bash -e {0}
+2026-04-17T17:16:02.1274760Z ##[endgroup]
+2026-04-17T17:16:02.1494798Z Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+2026-04-17T17:16:02.1664969Z 
+2026-04-17T17:16:02.2949759Z === BattleBrotts Test Suite ===
+2026-04-17T17:16:02.2950047Z 
+2026-04-17T17:16:02.2950190Z --- Data Validation ---
+2026-04-17T17:16:02.2950571Z --- Damage Formula ---
+2026-04-17T17:16:02.2950879Z --- Combat Simulation ---
+2026-04-17T17:16:02.3421636Z --- Module Tests ---
+2026-04-17T17:16:02.3423238Z --- Movement Tests ---
+2026-04-17T17:16:02.3436763Z 
+2026-04-17T17:16:02.3437107Z --- Sprint 10 Tests ---
+2026-04-17T17:16:02.3485487Z 
+2026-04-17T17:16:02.3485766Z === Results: 72 passed, 0 failed, 72 total ===
+2026-04-17T17:16:03.2721656Z WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+2026-04-17T17:16:03.2722187Z      at: cleanup (core/object/object.cpp:2378)
+2026-04-17T17:16:03.2728162Z ERROR: 1 resources still in use at exit (run with --verbose for details).
+2026-04-17T17:16:03.2728765Z    at: clear (core/io/resource.cpp:614)
+2026-04-17T17:16:03.2915616Z Running test_sprint11_2.gd
+2026-04-17T17:16:03.3094232Z Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+2026-04-17T17:16:03.3269650Z 
+2026-04-17T17:16:03.4503698Z === BattleBrotts Sprint 11.2 Test Suite ===
+2026-04-17T17:16:03.4504245Z === Juke Bugfix + Instrumentation ===
+2026-04-17T17:16:03.4504885Z 
+2026-04-17T17:16:03.4504892Z 
+2026-04-17T17:16:03.4505131Z -- Away Juke Cap (direct test) --
+2026-04-17T17:16:03.4516103Z   PASS: backup_distance capped: 0.0 px (max 32)
+2026-04-17T17:16:03.4516466Z 
+2026-04-17T17:16:03.4516618Z -- Away Juke Cap (100 seeds) --
+2026-04-17T17:16:03.8420303Z   PASS: No moonwalk violations (0/100)
+2026-04-17T17:16:03.8420694Z 
+2026-04-17T17:16:03.8421094Z -- Hit Rate Instrumentation --
+2026-04-17T17:16:03.8467129Z   PASS: Hit rates recorded for 1 weapon(s)
+2026-04-17T17:16:03.8467728Z   PASS: Hit rate for Plasma Cutter: 0.42 (valid range)
+2026-04-17T17:16:03.8468252Z   PASS: Total shots fired: 38 (>0)
+2026-04-17T17:16:03.8468543Z 
+2026-04-17T17:16:03.8468710Z -- TTK Instrumentation --
+2026-04-17T17:16:03.8516390Z   PASS: First engagement tick recorded: 9
+2026-04-17T17:16:03.8516880Z   PASS: TTK recorded for 1 bot(s)
+2026-04-17T17:16:03.8517323Z   PASS: TTK for Scout_1: 9.1s (non-negative)
+2026-04-17T17:16:03.8517658Z 
+2026-04-17T17:16:03.8517809Z -- Regression Summary --
+2026-04-17T17:16:03.9550819Z   PASS: Batch has 20 sims
+2026-04-17T17:16:03.9551257Z   PASS: Batch has win_rates
+2026-04-17T17:16:03.9551634Z   PASS: Batch has avg_ttk_sec: 10.5s
+2026-04-17T17:16:03.9552025Z   PASS: Batch has avg_hit_rates
+2026-04-17T17:16:03.9552794Z   Regression baseline: { "total_sims": 20, "win_rates": { 0: 8, 1: 12 }, "avg_ttk_sec": 10.53, "avg_hit_rates": { "Plasma Cutter": 0.46997191299655 } }
+2026-04-17T17:16:03.9553511Z 
+2026-04-17T17:16:03.9553648Z --- Results ---
+2026-04-17T17:16:03.9553990Z 12 passed, 0 failed out of 12
+2026-04-17T17:16:04.4327043Z WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+2026-04-17T17:16:04.4328294Z      at: cleanup (core/object/object.cpp:2378)
+2026-04-17T17:16:04.4333628Z ERROR: 1 resources still in use at exit (run with --verbose for details).
+2026-04-17T17:16:04.4334184Z    at: clear (core/io/resource.cpp:614)
+2026-04-17T17:16:04.4506478Z Running test_sprint12_1.gd
+2026-04-17T17:16:04.4683270Z Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+2026-04-17T17:16:04.4856088Z 
+2026-04-17T17:16:04.6116915Z === BattleBrotts Sprint 12.1 Test Suite ===
+2026-04-17T17:16:04.6117435Z === Movement Physics + Balance Tuning ===
+2026-04-17T17:16:04.6117727Z 
+2026-04-17T17:16:04.6117732Z 
+2026-04-17T17:16:04.6117871Z [Test] Chassis accel/decel/turn values
+2026-04-17T17:16:04.6118268Z   PASS: Scout accel = 660
+2026-04-17T17:16:04.6118590Z   PASS: Scout decel = 880
+2026-04-17T17:16:04.6118914Z   PASS: Scout turn_speed = 360
+2026-04-17T17:16:04.6119582Z   PASS: Brawler accel = 240
+2026-04-17T17:16:04.6119899Z   PASS: Brawler decel = 360
+2026-04-17T17:16:04.6120246Z   PASS: Brawler turn_speed = 240
+2026-04-17T17:16:04.6120590Z   PASS: Fortress accel = 90
+2026-04-17T17:16:04.6120916Z   PASS: Fortress decel = 150
+2026-04-17T17:16:04.6121258Z   PASS: Fortress turn_speed = 150
+2026-04-17T17:16:04.6121511Z 
+2026-04-17T17:16:04.6121654Z [Test] Scout reaches max speed in ~0.33s
+2026-04-17T17:16:04.6122597Z   FAIL: Scout 0→max in ~0.33s (got 0.4000, expected 0.3300, eps 0.0500)
+2026-04-17T17:16:04.6123287Z   PASS: Scout at max speed 220 (got 220.0000, expected 220.0000, eps 0.0100)
+2026-04-17T17:16:04.6123696Z 
+2026-04-17T17:16:04.6123813Z [Test] Brawler reaches max speed in ~0.50s
+2026-04-17T17:16:04.6124398Z   PASS: Brawler 0→max in ~0.50s (got 0.5000, expected 0.5000, eps 0.0500)
+2026-04-17T17:16:04.6124991Z 
+2026-04-17T17:16:04.6125148Z [Test] Fortress reaches max speed in ~0.67s
+2026-04-17T17:16:04.6125819Z   PASS: Fortress 0→max in ~0.67s (got 0.7000, expected 0.6700, eps 0.0500)
+2026-04-17T17:16:04.6126304Z 
+2026-04-17T17:16:04.6126462Z [Test] Afterburner multiplies accel by 1.8x
+2026-04-17T17:16:04.6127108Z   PASS: Afterburner accel = 660*1.8 = 1188 (got 1188.0000, expected 1188.0000, eps 0.0100)
+2026-04-17T17:16:04.6127953Z   PASS: Afterburner decel unchanged = 880 (got 880.0000, expected 880.0000, eps 0.0100)
+2026-04-17T17:16:04.6128466Z 
+2026-04-17T17:16:04.6128628Z [Test] Deceleration stops bot correctly
+2026-04-17T17:16:04.6129157Z   FAIL: Scout stops in ~0.25s (got 0.3000, expected 0.2500, eps 0.0500)
+2026-04-17T17:16:04.6129705Z   PASS: Scout fully stopped
+2026-04-17T17:16:04.6130136Z 
+2026-04-17T17:16:04.6130404Z [Test] Plasma Cutter fires at 2.5 tiles
+2026-04-17T17:16:04.6130814Z   PASS: Plasma Cutter fires at 2.5 tiles
+2026-04-17T17:16:04.6131093Z 
+2026-04-17T17:16:04.6131272Z [Test] Plasma Cutter does NOT fire at 2.6 tiles
+2026-04-17T17:16:04.6131749Z   FAIL: Plasma Cutter does NOT fire at 2.6 tiles
+2026-04-17T17:16:04.6132077Z 
+2026-04-17T17:16:04.6132214Z [Test] 1v1 overtime triggers at 45s
+2026-04-17T17:16:04.6278880Z   PASS: No overtime before 45s (tick 449)
+2026-04-17T17:16:04.6279362Z   PASS: Overtime active at 45s (tick 450)
+2026-04-17T17:16:04.6279658Z 
+2026-04-17T17:16:04.6279793Z [Test] 2v2 overtime triggers at 60s
+2026-04-17T17:16:04.6432382Z   PASS: No overtime at 45s for 2v2
+2026-04-17T17:16:04.6483433Z   PASS: Overtime active at 60s for 2v2 (tick 600)
+2026-04-17T17:16:04.6483792Z 
+2026-04-17T17:16:04.6483944Z [Test] 1v1 sudden death triggers at 60s
+2026-04-17T17:16:04.6694400Z   PASS: No sudden death before 60s (tick 599)
+2026-04-17T17:16:04.6695062Z   PASS: Sudden death at 60s (tick 600)
+2026-04-17T17:16:04.6695329Z 
+2026-04-17T17:16:04.6695463Z [Test] 2v2 sudden death triggers at 75s
+2026-04-17T17:16:04.6901307Z   PASS: No sudden death at 60s for 2v2
+2026-04-17T17:16:04.6955735Z   PASS: Sudden death at 75s for 2v2 (tick 750)
+2026-04-17T17:16:04.6956075Z 
+2026-04-17T17:16:04.6956199Z [Test] 1v1 timeout at 100s
+2026-04-17T17:16:04.7173599Z   PASS: 1v1 match over at 100s
+2026-04-17T17:16:04.7173885Z 
+2026-04-17T17:16:04.7174007Z [Test] 2v2 timeout at 120s
+2026-04-17T17:16:04.7390015Z   FAIL: 2v2 match NOT over at 100s
+2026-04-17T17:16:04.7390446Z   PASS: 2v2 match over at 120s
+2026-04-17T17:16:04.7390692Z 
+2026-04-17T17:16:04.7390828Z --- Results ---
+2026-04-17T17:16:04.7391050Z 26 passed, 4 failed out of 30
+2026-04-17T17:16:05.5910991Z WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+2026-04-17T17:16:05.5911570Z      at: cleanup (core/object/object.cpp:2378)
+2026-04-17T17:16:05.5917801Z ERROR: 1 resources still in use at exit (run with --verbose for details).
+2026-04-17T17:16:05.5918423Z    at: clear (core/io/resource.cpp:614)
+2026-04-17T17:16:05.6098417Z ##[error]Process completed with exit code 1.
+2026-04-17T17:16:05.6194797Z Post job cleanup.
+2026-04-17T17:16:05.7125089Z [command]/usr/bin/git version
+2026-04-17T17:16:05.7167188Z git version 2.53.0
+2026-04-17T17:16:05.7206314Z Temporarily overriding HOME='/home/runner/work/_temp/3ad26dc3-6ba0-4951-aa3e-6976beeff7b1' before making global git config changes
+2026-04-17T17:16:05.7207340Z Adding repository directory to the temporary git global config as a safe directory
+2026-04-17T17:16:05.7211420Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/battlebrotts-v2/battlebrotts-v2
+2026-04-17T17:16:05.7244204Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-04-17T17:16:05.7275862Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-04-17T17:16:05.7508927Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-04-17T17:16:05.7530279Z http.https://github.com/.extraheader
+2026-04-17T17:16:05.7541632Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-04-17T17:16:05.7572312Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-04-17T17:16:05.7797055Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-04-17T17:16:05.7827349Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-04-17T17:16:05.8185142Z Cleaning up orphan processes
+2026-04-17T17:16:05.8461636Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

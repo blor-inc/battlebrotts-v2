@@ -460,7 +460,10 @@ func _tick_charm_anims() -> void:
 				if b.spin_anim_timer <= 0:
 					b.charm_rotation = 0.0
 			elif is_moving and prev_vel.length() > 5.0:
-				var angle_diff := abs(cur_vel.angle_to(prev_vel))
+				# cur_vel is Variant (sim is untyped in this scope, so b.velocity is Variant),
+				# which propagates through angle_to() and abs(). Explicit annotation keeps the
+				# warnings-as-errors parser happy — same pattern as the S16.1-002 test_sprint10 fix.
+				var angle_diff: float = abs(cur_vel.angle_to(prev_vel))
 				if angle_diff > 0.5:  # ~30° threshold
 					if CharmAnims.should_scout_spin(charm_rng):
 						b.spin_anim_timer = 0.25

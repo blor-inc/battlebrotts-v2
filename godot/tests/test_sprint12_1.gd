@@ -163,7 +163,17 @@ func test_plasma_cutter_no_fire_2_6() -> void:
 	sim.add_brott(attacker)
 	sim.add_brott(target)
 
-	sim.simulate_tick()
+	# S16.1-003: isolate the `fire_at_range` check from movement.
+	# Running `simulate_tick()` runs `_move_brott` before `_fire_weapons`, and
+	# the Scout (speed=220 px/s, 0.1s tick) closes ~22px per tick when
+	# aggressive — enough to move 83.2px (2.6 tiles) into the 80px range gate
+	# before the fire check. That's test-scaffolding drift against the current
+	# tick ordering + TICKS_PER_SEC=10, not a `fire_at_range` regression
+	# (the `if dist > range_px: continue` guard in `_fire_weapons` is intact).
+	# Assign the target directly and invoke `_fire_weapons` so the assertion
+	# genuinely exercises the range gate.
+	attacker.target = target
+	sim._fire_weapons(attacker)
 	_assert(sim.shots_fired.size() == 0, "Plasma Cutter does NOT fire at 2.6 tiles")
 
 # --- Overtime threshold tests ---

@@ -50,7 +50,7 @@ Base chassis weight is excluded from the weight budget — only equipped items c
 | **Railgun** | 45 | 12 | 0.6 | 0 | 16 | 15 |
 | **Shotgun** | 6×5 pellets | 3 | 1.5 | 30 | 8 | 12 |
 | **Missile Pod** | 30 (splash r=1 tile) | 8 | 0.8 | 5 | 12 | 18 |
-| **Plasma Cutter** | 14 | 1.5 | 3 | 0 | 4 | 8 |
+| **Plasma Cutter** | 14 | 2.5 | 3 | 0 | 4 | 8 |
 | **Arc Emitter** | 8 (chains to 1 extra target within 2 tiles) | 4 | 2 | 10 | 6 | 11 |
 | **Flak Cannon** | 15 | 6 | 1.2 | 20 | 7 | 13 |
 

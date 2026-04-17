@@ -110,3 +110,96 @@ If future readers find the "intent-frame vs post-tick" distinction non-obvious w
 - Metric: **pre-tick**.
 - COMMIT pass-through: **allowed** (no collision guard).
 - S15.2 scope: **trivial** — ~5–10 line test change + rerun.
+
+---
+
+## Addendum: period-boundary reset ruling
+
+**Date:** 2026-04-17 (same-day supplement)
+**Status:** RULING — extends the S15.2 pre-tick ruling to close AC #2
+**Triggered by:** Nutts' PR #84 — pre-tick sampling dropped 7/100 → 3/100; seeds 2, 63, 84 remain.
+
+### Question
+
+GDD L286 reads: *"Respects backup_distance cap (max 1 tile retreat before lateral movement)."* Two candidate readings:
+
+- **(A) Per-period.** The 1-tile cap is a budget that resets once lateral movement (or a phase transition) breaks the retreat. Multiple retreat periods per combat phase are legal as long as each period respects the budget.
+- **(B) Absolute rolling.** The 1-tile cap is a cumulative hard ceiling across the entire combat phase regardless of period breaks.
+
+### Ruling: (A) Per-period reset.
+
+Three pillars:
+
+**1. GDD phrasing encodes a budget-with-break semantic, not a hard ceiling.**
+
+The operative clause is *"max 1 tile retreat **before lateral movement**."* The "before lateral" qualifier is load-bearing: it names the event that *bounds* the 1-tile allowance. If the designer had meant an absolute ceiling, the natural phrasing would be *"max 1 tile net retreat per phase"* or *"max 1 tile retreat in any combat cycle."* The actual phrasing reads as a sequencing rule — "you may retreat up to 1 tile, then you must break with lateral motion" — with the implication that after you break, the sequence can restart. This is the same shape as a dash-cooldown or a combo-breaker: a per-use budget gated by an interrupt condition.
+
+**2. Runtime canon is per-period, and it's been stable for 15 sprints.**
+
+`combat_sim.gd` resets `backup_distance = 0.0` at seven authored sites:
+
+- Enter combat (L395), exit combat (L414).
+- Phase transitions: COMMIT→RECOVERY (L746), RECOVERY→TENSION (L753).
+- TENSION branch: after orbit-out (L776), after lateral (L785), after in-band orbit (L789).
+
+The budget is enforced via `if b.backup_distance < TILE_SIZE` guards (L778, L825); once the budget is exhausted, the code falls through to a lateral branch which resets `bd` to 0 on the *next* reset opportunity. This is a canonical per-period implementation. The runtime has shipped since S11.1 and been playtested through S15.1 without anyone — HCD, Optic, playtesters — flagging a "bot retreats further than it should" gameplay issue. If the design intent were absolute-rolling, the runtime would have been wrong for four sprints, and playtest would have surfaced it. The parsimonious reading is: the runtime is correct; the new test metric is over-counting.
+
+**3. Chassis fantasy relies on TCR rhythm, which inherently creates multi-period retreat sequences.**
+
+The TCR cycle (GDD L261–287) guarantees that within a single combat engagement, a bot cycles through RECOVERY→TENSION→COMMIT→RECOVERY… repeatedly. Each RECOVERY phase is authored to *retreat away from target at 90% base speed* (L285), and each TENSION phase permits *backing away max 1 tile straight line, then lateral* when too close (L289–292). A long engagement will legitimately produce several retreat-then-lateral-then-retreat sequences. Under Reading (B), any multi-phase engagement where the bot retreated in two or more phases would violate — which would make the RECOVERY phase's authored retreat behavior self-contradictory with the backup_distance cap. Reading (A) resolves the contradiction: each phase's retreat is its own budgeted period.
+
+**Seed 84 corroborates.** Nutts' trace shows 4 consecutive backward ticks with `bd` pinned at 32 on some ticks and backward motion continuing. The only way backward motion occurs while `bd == TILE_SIZE` is through a phase transition resetting `bd` mid-run (L746/753) or through separation force (already clamped in S15.1 against the same budget — which itself resets on phase boundaries). Either way, the backward motion is coming from a *new* retreat period the runtime has authorized via the reset. The test's rolling accumulator doesn't observe the reset and mis-attributes the new period's motion to the old one. That is a test-metric artifact of exactly the same shape as the post-tick crossover artifact — it measures state the invariant was never defined against.
+
+**Seed 2 corroborates explicitly.** Nutts' trace: *"`bd` hits 32 then resets to 13.2 at t=44 (new retreat period starts) but test's rolling `backup_run` doesn't reset because `dot < −0.7` stays true across the period boundary."* The runtime has done exactly what the design says: budget exhausted, lateral break (implied by the reset), new period begins. The test is failing to honor the reset.
+
+### Why not (B)?
+
+Adopting (B) would require:
+
+- Reinterpreting GDD L286 against its natural reading.
+- Declaring `combat_sim.gd` buggy for 15 sprints against unanimous playtest silence.
+- Redesigning RECOVERY to either forbid retreat-after-first-period or track a cross-phase cumulative counter — a balance change that invalidates the S13.3 TCR tuning and the S15.1 budget-clamp design.
+- Breaking S15.2's scope gate (runtime frozen) and deferring closure to S15.3/S16.
+
+That's a five-order cascade triggered by a metric that was only added in S15 for regression detection. The alternative is a one-line test change. Occam applies.
+
+### Concrete test change (for Nutts)
+
+In `godot/tests/test_sprint11_2.gd::test_away_juke_cap_across_seeds`, reset the rolling `backup_run` accumulator whenever the runtime's `backup_distance` drops (signaling a period boundary — phase transition or lateral break that the runtime already enforces). Add one variable and one branch inside the existing dot-product block:
+
+```gdscript
+var prev_bd := 0.0  # track bd across ticks so we can detect resets
+# ...inside the for _t in range(300): loop, after simulate_tick():...
+if b0.alive and b0.target != null:
+    # Period-boundary reset: if the runtime dropped bd (phase transition or
+    # lateral break), we've entered a new retreat period — reset the rolling
+    # accumulator. Per Gizmo's S15.2 addendum: the invariant is per-period,
+    # not absolute-rolling. GDD L286: "max 1 tile retreat before lateral
+    # movement" — the bd drop IS the lateral/phase break.
+    if b0.backup_distance < prev_bd:
+        backup_run = 0.0
+    prev_bd = b0.backup_distance
+    var movement: Vector2 = b0.position - prev_pos
+    # ...existing dot-product logic unchanged...
+```
+
+That's the entire change. Place the reset check **before** the movement/dot block so a period boundary clears the run before the current tick's motion is accumulated into it. Apply the same reset to `godot/tests/harness/debug_moonwalk.gd` for diagnostic consistency (per original AC #7).
+
+### Scope
+
+**`combat_sim.gd` stays untouched.** S15.2's scope gate holds. The runtime is correct; the test was measuring an invariant the runtime was never defined against, and the fix is another test-side refinement in the same spirit as the pre-tick sampling fix.
+
+### Acceptance criteria (unchanged from main ruling)
+
+AC #2 expected outcome after this change: seeds 2, 63, 84 join seeds 23, 45, 67, 80 as passing. `No moonwalk violations (0/100)`. All other ACs from the main ruling remain as written. AC #5 (no `combat_sim.gd` drift) remains intact.
+
+### GDD update
+
+None required. This is a clarification of the existing canon, same as the main ruling. If Specc wants to add a one-line gloss to `docs/kb/juke-bypass-movement-caps.md` noting *"the backup_distance cap is per-retreat-period (runtime resets bd on phase transitions and lateral breaks); tests that measure it must honor the reset"*, that would be useful future-proofing — but not required.
+
+### Verdict summary for Riv
+
+- Reading: **(A) per-period reset.**
+- Test change: add a 2-line `if b0.backup_distance < prev_bd: backup_run = 0.0` reset guard (plus a `prev_bd` tracker) ahead of the dot-product block; mirror into `debug_moonwalk.gd`.
+- Scope: **TRIVIAL.** `combat_sim.gd` untouched; S15.2 scope gate preserved.
+- Expected outcome: 3/100 → 0/100 → S15.2 closes clean in PR #84.

@@ -24,7 +24,7 @@ from pathlib import Path
 
 REPO = "brott-studio/battlebrotts-v2"
 AUDITS_REPO = "brott-studio/studio-audits"
-AUDITS_SUBDIR = "battlebrotts-v2"
+AUDITS_SUBDIR = "audits/battlebrotts-v2"
 DEFAULT_BRANCH = "main"
 VERIFY_WORKFLOW_FILE = "verify.yml"
 
@@ -199,7 +199,7 @@ def fetch_recent_audits() -> list[dict] | None:
         return None
     if not isinstance(listing, list):
         return []
-    files = [f for f in listing if f.get("type") == "file" and re.match(r"sprint.*-audit\.md$", f.get("name", ""), re.I)]
+    files = [f for f in listing if f.get("type") == "file" and re.match(r"(?:v2-)?sprint.*\.md$", f.get("name", ""), re.I)]
     files.sort(key=lambda f: _sprint_sort_key(f["name"]), reverse=True)
     top = files[:3]
     out = []

@@ -24,11 +24,13 @@ Build autonomous combat Brotts, teach them how to fight with drag-and-drop Behav
 - [#76](https://github.com/brott-studio/battlebrotts-v2/pull/76) [S14.2-A] BrottBrain UI polish
 
 **Recent audits** (from [studio-audits](https://github.com/brott-studio/studio-audits))
-- _Audits unavailable (configure `BROTT_STUDIO_PAT` secret)_
+- S15.2 — B+ · [audit](https://github.com/brott-studio/studio-audits/blob/main/audits/battlebrotts-v2/v2-sprint-15.2.md)
+- S15.1 — B · [audit](https://github.com/brott-studio/studio-audits/blob/main/audits/battlebrotts-v2/v2-sprint-15.1.md)
+- S14.1 — ? · [audit](https://github.com/brott-studio/studio-audits/blob/main/audits/battlebrotts-v2/v2-sprint-14.1.md)
 
 **Docs:** [GDD](./docs/gdd.md) · [Audio Vision](./docs/kb/audio-vision.md) · [UX Vision](./docs/kb/ux-vision.md) · [Pipeline](https://github.com/blor-inc/studio-framework/blob/main/PIPELINE.md)
 
-_Last updated: 2026-04-17 19:57 UTC · [update log](../../actions/workflows/readme-status.yml)_
+_Last updated: 2026-04-17 20:03 UTC · [update log](../../actions/workflows/readme-status.yml)_
 <!-- STATUS-END -->
 
 ## Links

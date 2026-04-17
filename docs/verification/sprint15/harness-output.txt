@@ -1,0 +1,15 @@
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== Moonwalk seed scan (0..99) ===
+seed=2 violated_at_tick=44 max_run=38.6
+seed=23 violated_at_tick=40 max_run=79.8
+seed=45 violated_at_tick=92 max_run=46.4
+seed=63 violated_at_tick=39 max_run=52.0
+seed=67 violated_at_tick=63 max_run=39.0
+seed=80 violated_at_tick=30 max_run=85.2
+seed=84 violated_at_tick=32 max_run=67.3
+=== Total violations: 7/100 ===
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2378)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:614)

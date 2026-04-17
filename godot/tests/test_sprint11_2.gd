@@ -110,7 +110,10 @@ func test_away_juke_cap_across_seeds() -> void:
 				if to_target_pre.length() > 0.1 and movement.length() > 0.1:
 					var dot: float = movement.normalized().dot(to_target_pre.normalized())
 					if dot < -0.7:
-						backup_run += movement.length()
+						if b0.backup_distance < CombatSim.TILE_SIZE:  # budget-gated: only accumulate while retreat period is live
+							backup_run += movement.length()
+						# else: post-cap freeze (Gizmo S15.2 Addendum 2) — authored lateral/orbit
+						# motion past the cap is not a moonwalk; wait for period-boundary reset.
 					else:
 						backup_run = 0.0
 				prev_pos = b0.position

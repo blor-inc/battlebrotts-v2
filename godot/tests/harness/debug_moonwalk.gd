@@ -59,8 +59,10 @@ func _scan_all_seeds() -> void:
 				if tt_pre.length() > 0.1 and mv.length() > 0.1:
 					var dot: float = mv.normalized().dot(tt_pre.normalized())
 					if dot < -0.7:
-						backup_run += mv.length()
-						if backup_run > max_run: max_run = backup_run
+						if b0.backup_distance < CombatSim.TILE_SIZE:  # budget-gated (Addendum 2)
+							backup_run += mv.length()
+							if backup_run > max_run: max_run = backup_run
+						# else: post-cap freeze
 					else:
 						backup_run = 0.0
 				prev_pos = b0.position
@@ -102,7 +104,9 @@ func _trace_seed(seed_val: int) -> void:
 		if tt_pre.length() > 0.1 and mv.length() > 0.1:
 			dot = mv.normalized().dot(tt_pre.normalized())
 			if dot < -0.7:
-				backup_run += mv.length()
+				if b0.backup_distance < CombatSim.TILE_SIZE:  # budget-gated (Addendum 2)
+					backup_run += mv.length()
+				# else: post-cap freeze
 			else:
 				backup_run = 0.0
 		print("t=%d b0=(%.1f,%.1f) b1=(%.1f,%.1f) mv=%.2f dot=%.2f run=%.1f phase=%d bd=%.1f unstick=%.1f" % [

@@ -1,6 +1,6 @@
 # KB: Diagnosing moonwalk regressions with the debug harness
 
-**Added:** 2026-04-17 (Sprint 15 audit, Specc)
+**Added:** 2026-04-17 (Sprint 15.1 audit, Specc)
 **Applies to:** `test_sprint11_2.gd`, `godot/combat/combat_sim.gd`, any movement-cap regression in Battlebrotts.
 
 ## When to use
@@ -11,7 +11,7 @@ Don't guess which path. Use the harness.
 
 ## Tool
 
-`godot/tests/harness/debug_moonwalk.gd` (added S15 by Nutts). Turnkey per-seed repro.
+`godot/tests/harness/debug_moonwalk.gd` (added S15.1 by Nutts). Turnkey per-seed repro.
 
 ### Modes
 
@@ -31,14 +31,14 @@ When reading a per-tick trace, match the failure pattern to one of these known s
 
 | Signature | Path | Status |
 |---|---|---|
-| `phase=0 (ORBIT)`, `bd=0`, `mv≈11`, `dot < -0.7`, repeated ticks | **Separation force** (`_move_brott` ~L535) | **Clamped in S15** (`dc0e49d`). If this shows up again, the clamp regressed or `sep_dist < 2*BOT_HITBOX_RADIUS` overlap-exception is firing too often. |
-| `phase=*`, unstick flag set, `mv≈7`, backward direction | **Unstick nudge** (`_check_and_handle_stuck` ~L613) | **Clamped in S15** (`1e60bb6`). If regressed, check `_wall_escape_direction` resolution. |
-| `phase=1 (COMMIT)`, `bd=0`, `mv > 20`, `dot ≈ -1.0`, single-tick spike then stable | **COMMIT-crossover test-metric artifact** | **Not a code bug.** Bots swap positions during COMMIT; forward dash reads as backward under post-tick `to_target`. Fix is in the test (pre-tick sampling) or in movement pipeline (prevent crossover). See S15 audit for ruling state. |
+| `phase=0 (ORBIT)`, `bd=0`, `mv≈11`, `dot < -0.7`, repeated ticks | **Separation force** (`_move_brott` ~L535) | **Clamped in S15.1** (`dc0e49d`). If this shows up again, the clamp regressed or `sep_dist < 2*BOT_HITBOX_RADIUS` overlap-exception is firing too often. |
+| `phase=*`, unstick flag set, `mv≈7`, backward direction | **Unstick nudge** (`_check_and_handle_stuck` ~L613) | **Clamped in S15.1** (`1e60bb6`). If regressed, check `_wall_escape_direction` resolution. |
+| `phase=1 (COMMIT)`, `bd=0`, `mv > 20`, `dot ≈ -1.0`, single-tick spike then stable | **COMMIT-crossover test-metric artifact** | **Not a code bug.** Bots swap positions during COMMIT; forward dash reads as backward under post-tick `to_target`. Fix is in the test (pre-tick sampling) or in movement pipeline (prevent crossover). See S15.1 audit for ruling state. |
 | None of the above | **New bypass path** | Write a new clamp, append this table. |
 
 ## Historical context
 
-Do **not** re-chase the `juke` "away" branch. It was removed before S15 (see `docs/kb/juke-bypass-movement-caps.md` S15 update). `git grep 'juke' godot/combat/combat_sim.gd` should return zero.
+Do **not** re-chase the `juke` "away" branch. It was removed before S15 (see `docs/kb/juke-bypass-movement-caps.md` S15.1 update). `git grep 'juke' godot/combat/combat_sim.gd` should return zero.
 
 ## Pattern
 
@@ -51,5 +51,5 @@ Do **not** re-chase the `juke` "away" branch. It was removed before S15 (see `do
 ## Related
 
 - `docs/kb/juke-bypass-movement-caps.md` — original anti-pattern.
-- S15 audit: `studio-audits/audits/battlebrotts-v2/v2-sprint-15.md`.
+- S15.1 audit: `studio-audits/audits/battlebrotts-v2/v2-sprint-15.1.md`.
 - Test: `godot/tests/test_sprint11_2.gd :: test_away_juke_cap_across_seeds`.

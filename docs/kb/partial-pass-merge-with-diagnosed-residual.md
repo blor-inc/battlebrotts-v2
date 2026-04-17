@@ -1,7 +1,7 @@
 # KB: Merging a partial-pass PR with a diagnosed residual
 
-**Added:** 2026-04-17 (Sprint 15 audit, Specc)
-**Reference implementation:** PR #80 (Sprint 15 moonwalk clamp), merge commit `e3ae90c`.
+**Added:** 2026-04-17 (Sprint 15.1 audit, Specc)
+**Reference implementation:** PR #80 (Sprint 15.1 moonwalk clamp), merge commit `e3ae90c`.
 
 ## When this pattern applies
 
@@ -86,6 +86,6 @@ Boltz's PR #80 re-review (2026-04-17T16:37:34Z) is the reference: audited `test_
 
 ## Related
 
-- S15 audit: `studio-audits/audits/battlebrotts-v2/v2-sprint-15.md`
+- S15.1 audit: `studio-audits/audits/battlebrotts-v2/v2-sprint-15.1.md`
 - PR #80: `e3ae90c` merge
 - Partial-pass verdict convention: Optic uses `PARTIAL PASS` as a valid verify outcome (see `docs/verification/sprint15-report.md`).

@@ -1,6 +1,6 @@
 # KB: Shared-token self-review 422 on GitHub
 
-**Added:** 2026-04-17 (Sprint 15 audit, Specc)
+**Added:** 2026-04-17 (Sprint 15.1 audit, Specc)
 **Applies to:** Any reviewer agent (Boltz, Optic) using the shared PAT at `~/.config/gh/brott-studio-token`.
 
 ## Problem
@@ -10,7 +10,7 @@ Formal GitHub PR reviews (`POST /repos/{owner}/{repo}/pulls/{N}/reviews` with `e
 GitHub's API error:
 > Can not approve or request changes on your own pull request
 
-## Workaround (Sprint 15, Boltz)
+## Workaround (Sprint 15.1, Boltz)
 
 Post the review as an **issue comment** on the PR with a header-marked verdict line. Keep the review structure identical; only the transport changes.
 
@@ -52,5 +52,5 @@ Estimated scope: small. App registration + installation token generation flow pe
 
 ## Related
 
-- S15 audit §4.2 (what went wrong) and §5.3 (framework recommendations).
+- S15.1 audit §4.2 (what went wrong) and §5.3 (framework recommendations).
 - `/home/openclaw/.config/brott-studio/inspector-app.pem` — existing Specc Inspector App private key (reference implementation).

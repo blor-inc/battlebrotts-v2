@@ -1,11 +1,11 @@
 # KB: Juke/Burst Movement Can Bypass Movement Caps
 
-**Sprint:** 11.1 (discovered), 15 (follow-up: juke branch gone, new bypass sources found)  
+**Sprint:** 11.1 (discovered), 15.1 (follow-up: juke branch gone, new bypass sources found)  
 **Discovered by:** Optic (verification), Specc (root cause)  
 **Severity:** Low  
-**Status:** Partially mitigated (S15 per-path clamps); root-cause Option 2 refactor still deferred
+**Status:** Partially mitigated (S15.1 per-path clamps); root-cause Option 2 refactor still deferred
 
-## Update — Sprint 15 (2026-04-17)
+## Update — Sprint 15.1 (2026-04-17)
 
 The original `juke_type == "away"` branch **no longer exists** in `combat_sim.gd` (`git grep 'juke'` in `godot/combat/combat_sim.gd` is empty; only vestigial `BrottState.juke_type` state remains). The `backup_distance` budget is now respected everywhere inside `_do_combat_movement()`.
 
@@ -16,7 +16,7 @@ However, `test_sprint11_2.gd::test_away_juke_cap_across_seeds` still fails on `m
 
 PR #80 applies per-path clamps to both (gating the backward component against the shared `backup_distance` budget, passing lateral/forward through untouched). This closes the two bypass paths Ett scoped without a refactor.
 
-**Remaining failure mode (not fixed by S15):** the test metric `movement.normalized().dot(to_target.normalized()) < -0.7` uses *post-tick* `to_target`. When two bots both COMMIT toward each other at close range, they can swap positions in a single tick — and forward COMMIT push then reads as "backward" in the new post-tick frame. This produces test-metric-registered backward runs of 40–100+ px even though no path retreats in its own reference frame. Reaching `violations == 0` requires either (a) preventing bot-to-bot crossover during COMMIT (a movement-pipeline change) or (b) Option 2 below (post-processing clamp at the tick boundary). Both are refactors; deferred to a follow-up sprint.
+**Remaining failure mode (not fixed by S15.1):** the test metric `movement.normalized().dot(to_target.normalized()) < -0.7` uses *post-tick* `to_target`. When two bots both COMMIT toward each other at close range, they can swap positions in a single tick — and forward COMMIT push then reads as "backward" in the new post-tick frame. This produces test-metric-registered backward runs of 40–100+ px even though no path retreats in its own reference frame. Reaching `violations == 0` requires either (a) preventing bot-to-bot crossover during COMMIT (a movement-pipeline change) or (b) Option 2 below (post-processing clamp at the tick boundary). Both are refactors; deferred to a follow-up sprint.
 
 **Don't re-chase the juke branch — it's gone. Future moonwalk bugs live in: separation force, unstick nudge, and COMMIT-crossover geometry.**
 

@@ -32,17 +32,17 @@ START = "<!-- STATUS-START -->"
 END = "<!-- STATUS-END -->"
 
 AREA_LABELS = [
-    ("audio", "🎵 Audio"),
-    ("art", "🎨 Art"),
-    ("ux", "✨ UX"),
-    ("gameplay", "🎮 Gameplay"),
-    ("tech-debt", "🔧 Tech-Debt"),
-    ("framework", "🏗️ Framework"),
+    ("area:audio", "🎵 Audio"),
+    ("area:art", "🎨 Art"),
+    ("area:ux", "✨ UX"),
+    ("area:gameplay", "🎮 Gameplay"),
+    ("area:tech-debt", "🔧 Tech-Debt"),
+    ("area:framework", "🏗️ Framework"),
 ]
 PRIO_LABELS = [
-    ("high", "🔴 High"),
-    ("mid", "🟡 Mid"),
-    ("low", "🔵 Low"),
+    ("prio:high", "🔴 High"),
+    ("prio:mid", "🟡 Mid"),
+    ("prio:low", "🔵 Low"),
 ]
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -110,17 +110,31 @@ def _search_issue_count(q: str) -> int:
     return int(data.get("total_count", 0))
 
 
+def _list_issue_count(labels: list[str]) -> int:
+    # Use /repos/{owner}/{repo}/issues with comma-joined labels — handles
+    # labels containing ':' (e.g. area:audio) which the search API requires
+    # to be quoted. Cap at 100; backlog is not expected to exceed that soon.
+    data = gh(f"/repos/{REPO}/issues", params={
+        "state": "open",
+        "labels": ",".join(labels),
+        "per_page": 100,
+    })
+    if not isinstance(data, list):
+        return 0
+    # Filter out PRs (the issues endpoint returns PRs too, they have 'pull_request' key).
+    return sum(1 for i in data if "pull_request" not in i)
+
+
 def fetch_backlog_counts() -> dict:
-    base = f'repo:{REPO} is:issue is:open label:backlog'
     out: dict = {
-        "total": _search_issue_count(base),
+        "total": _list_issue_count(["backlog"]),
         "areas": {},
         "prios": {},
     }
     for key, _label in AREA_LABELS:
-        out["areas"][key] = _search_issue_count(f'{base} label:{key}')
+        out["areas"][key] = _list_issue_count(["backlog", key])
     for key, _label in PRIO_LABELS:
-        out["prios"][key] = _search_issue_count(f'{base} label:{key}')
+        out["prios"][key] = _list_issue_count(["backlog", key])
     return out
 
 

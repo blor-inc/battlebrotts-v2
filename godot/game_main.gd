@@ -32,8 +32,15 @@ var speed_label: Label
 var player_brott: BrottState
 var enemy_brott: BrottState
 
+## S14.1: when a league unlocks, stash the id here so the next
+## ResultScreen → Shop transition shows the ceremony modal first.
+var _pending_league_ceremony: String = ""
+var _league_signal_connected: bool = false
+var _concede_confirm: AcceptDialog = null
+
 func _ready() -> void:
 	game_flow = GameFlow.new()
+	_connect_league_signal()
 	# URL parameter routing for web builds (enables Playwright screen tests)
 	if OS.has_feature("web"):
 		var screen_param = JavaScriptBridge.eval("new URLSearchParams(window.location.search).get('screen')")
@@ -91,9 +98,38 @@ func _show_main_menu() -> void:
 func _on_new_game() -> void:
 	game_flow.new_game()
 	player_brain = null
+	_league_signal_connected = false
+	_pending_league_ceremony = ""
+	_connect_league_signal()
 	_show_shop()
 
+## S14.1: connect to GameState.league_unlocked so we can gate the next
+## _show_shop call on a ceremony modal. GameState is re-instantiated on
+## new_game(), so this must be called again after new_game().
+func _connect_league_signal() -> void:
+	if game_flow == null or game_flow.game_state == null:
+		return
+	if _league_signal_connected:
+		return
+	game_flow.game_state.league_unlocked.connect(_on_league_unlocked)
+	_league_signal_connected = true
+
+func _on_league_unlocked(league_id: String) -> void:
+	_pending_league_ceremony = league_id
+
 func _show_shop() -> void:
+	# S14.1: if a league just unlocked, the ceremony modal gates shop reveal.
+	# On Continue, modal calls GameState.advance_league() then emits
+	# modal_dismissed; we then proceed into the shop normally.
+	if _pending_league_ceremony != "":
+		var ceremony := _pending_league_ceremony
+		_pending_league_ceremony = ""
+		var modal_scene: PackedScene = load("res://ui/league_complete_modal.tscn")
+		var modal := modal_scene.instantiate()
+		modal.setup(game_flow.game_state)
+		add_child(modal)
+		modal.modal_dismissed.connect(_show_shop)
+		return
 	_clear_screen()
 	var shop := ShopScreen.new()
 	shop.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -238,6 +274,50 @@ func _create_arena_hud() -> void:
 	speed_label.position = Vector2(600, 680)
 	speed_label.size = Vector2(100, 30)
 	add_child(speed_label)
+
+	# S14.1: concede pill — tucked top-right, low-contrast. No pause menu.
+	# Two-step confirm: tap → "Throw in the wrench? Yes / No" → Yes applies loss.
+	var concede := Button.new()
+	concede.text = "Concede"
+	concede.name = "ConcedeButton"
+	concede.position = Vector2(1180, 10)
+	concede.size = Vector2(80, 24)
+	concede.modulate = Color(1, 1, 1, 0.55)
+	concede.flat = true
+	concede.pressed.connect(_on_concede_pressed)
+	add_child(concede)
+
+func _on_concede_pressed() -> void:
+	if not in_arena or sim == null or sim.match_over:
+		return
+	if _concede_confirm != null and is_instance_valid(_concede_confirm):
+		return
+	_concede_confirm = AcceptDialog.new()
+	_concede_confirm.dialog_text = "Throw in the wrench?"
+	_concede_confirm.title = "Concede"
+	_concede_confirm.ok_button_text = "Yes"
+	_concede_confirm.add_cancel_button("No")
+	_concede_confirm.confirmed.connect(_concede_fight)
+	_concede_confirm.canceled.connect(_on_concede_cancel)
+	_concede_confirm.close_requested.connect(_on_concede_cancel)
+	add_child(_concede_confirm)
+	_concede_confirm.popup_centered()
+
+func _on_concede_cancel() -> void:
+	if _concede_confirm != null and is_instance_valid(_concede_confirm):
+		_concede_confirm.queue_free()
+	_concede_confirm = null
+
+## S14.1: concede = reuse existing loss path. We drive CombatSim into the
+## match-over state with the enemy team as winner; _on_match_end handles
+## bolts/progression/result screen identically to HP-zero loss.
+func _concede_fight() -> void:
+	_concede_confirm = null
+	if not in_arena or sim == null or sim.match_over:
+		return
+	var enemy_team := 1 if (enemy_brott != null and enemy_brott.team == 1) else 1
+	sim.match_over = true
+	_on_match_end(enemy_team)
 
 func _on_match_end(winner_team: int) -> void:
 	var won := winner_team == 0

@@ -562,6 +562,113 @@ func _move_brott(b: BrottState) -> void:
 			if b.in_combat_movement and b.position != old_p:
 				b.orbit_direction *= -1
 
+	# S14.1-B: Wall-stuck detection. Bots can freeze against walls, pillars, or
+	# behind LOS-blocking geometry during COMMIT/RECOVERY or when Aggressive
+	# stance has dist within tolerance. If history shows <10px displacement over
+	# 1.5s while alive+has target, trigger unstick (flip orbit, reset TCR, push
+	# away from geometry for 8 ticks).
+	_check_and_handle_stuck(b)
+
+# S14.1-B2: Geometry-proximity gate. Returns true if bot is within arm-distance
+# of a wall or pillar. This is the ONLY condition under which wall-stuck
+# detection is armed. Rationale (see Boltz HOLD review on PR #74):
+#  - Flag 2 (root cause): ungated detection fired on 91/100 open-space matches;
+#    the 10px/1.5s threshold trips during routine close-quarters Scout orbit.
+#    Gating by proximity to geometry drops open-space unstick fires to 0/100
+#    while still catching wall/pillar pins (T1, T2, T4 in test_sprint14_1_nav).
+#  - Perf/determinism: early-out BEFORE touching any state on `b` preserves
+#    the main-baseline tick ordering for open-space fights (the per-tick
+#    append/pop_front on Array[Vector2] subtly perturbs Scout close-combat
+#    scheduling even when unstick never fires).
+func _is_near_geometry(b: BrottState) -> bool:
+	const WALL_PROX_PX: float = TILE_SIZE
+	# Pillar threshold is center-to-center distance. Pillars have a ~16px repel
+	# radius (see the BOT_HITBOX_RADIUS+16 push-out above); arming unstick at 60px
+	# catches actual corner-pins without firing during routine close-quarters
+	# orbit through the pillar quadrant (lead investigation notes on PR #74).
+	const PILLAR_PROX_PX: float = 60.0
+	var arena_px: float = 16.0 * TILE_SIZE
+	if b.position.x < WALL_PROX_PX or b.position.x > arena_px - WALL_PROX_PX:
+		return true
+	if b.position.y < WALL_PROX_PX or b.position.y > arena_px - WALL_PROX_PX:
+		return true
+	for p: Vector2 in _get_pillar_positions():
+		if b.position.distance_squared_to(p) < PILLAR_PROX_PX * PILLAR_PROX_PX:
+			return true
+	return false
+
+func _check_and_handle_stuck(b: BrottState) -> void:
+	const STUCK_WINDOW_TICKS: int = 15   # 1.5s at 10 ticks/sec
+	const STUCK_MIN_PX: float = 10.0
+	const UNSTICK_DURATION_TICKS: float = 8.0
+	const UNSTICK_NUDGE_PX_PER_TICK: float = 7.0
+	# Unstick maneuver in progress — always service it (even if no longer near
+	# geometry) so the 8-tick push-away completes cleanly.
+	if b._unstick_timer > 0.0:
+		if not b.alive or b.target == null or not b.target.alive:
+			b._unstick_timer = 0.0
+			b._stuck_history.clear()
+			return
+		b._unstick_timer -= 1.0
+		var nudge: Vector2 = _wall_escape_direction(b)
+		if nudge != Vector2.ZERO:
+			b.position += nudge * UNSTICK_NUDGE_PX_PER_TICK
+			var arena_px2: float = 16.0 * TILE_SIZE
+			b.position.x = clampf(b.position.x, BOT_HITBOX_RADIUS, arena_px2 - BOT_HITBOX_RADIUS)
+			b.position.y = clampf(b.position.y, BOT_HITBOX_RADIUS, arena_px2 - BOT_HITBOX_RADIUS)
+		return
+	if not b.alive or b.target == null or not b.target.alive:
+		if not b._stuck_history.is_empty():
+			b._stuck_history.clear()
+		return
+	# Early-out for open-space fights: no state mutation at all when not near
+	# geometry. This preserves main-branch tick ordering for Scout close-combat.
+	if not _is_near_geometry(b):
+		if not b._stuck_history.is_empty():
+			b._stuck_history.clear()
+		return
+	b._stuck_history.append(b.position)
+	if b._stuck_history.size() > STUCK_WINDOW_TICKS:
+		b._stuck_history.pop_front()
+	if b._stuck_history.size() < STUCK_WINDOW_TICKS:
+		return
+	if b.position.distance_to(b._stuck_history[0]) < STUCK_MIN_PX:
+		b._unstick_timer = UNSTICK_DURATION_TICKS
+		b.orbit_direction *= -1
+		b.combat_phase = 0
+		var tcr: Dictionary = _get_tension_range(b)
+		b.combat_phase_timer = rng.randi_range(tcr["min"], tcr["max"])
+		b.backup_distance = TILE_SIZE  # skip backup budget; go to lateral
+		b.tension_drift_timer = TENSION_DRIFT_INTERVAL
+		b._stuck_history.clear()
+		if json_log_enabled:
+			_tick_events.append({"type": "nav_unstick", "bot_id": b.bot_name, "pos": [b.position.x, b.position.y]})
+
+func _wall_escape_direction(b: BrottState) -> Vector2:
+	# Push away from nearest wall/pillar. If no clear wall/pillar vector (rare,
+	# since we only arm near geometry), bias TOWARD target — advancing breaks
+	# wedge standoffs and, critically, does NOT produce the moonwalk arc that a
+	# perpendicular-to-target fallback would (Boltz HOLD review, Flag 1).
+	const WALL_PROX_PX: float = TILE_SIZE
+	const PILLAR_PROX_PX: float = BOT_HITBOX_RADIUS + 48.0
+	var arena_px: float = 16.0 * TILE_SIZE
+	var e := Vector2.ZERO
+	if b.position.x < WALL_PROX_PX: e.x += 1.0
+	if b.position.x > arena_px - WALL_PROX_PX: e.x -= 1.0
+	if b.position.y < WALL_PROX_PX: e.y += 1.0
+	if b.position.y > arena_px - WALL_PROX_PX: e.y -= 1.0
+	for p: Vector2 in _get_pillar_positions():
+		var away: Vector2 = b.position - p
+		if away.length() < PILLAR_PROX_PX and away.length() > 0.01:
+			e += away.normalized()
+	if e.length() >= 0.01:
+		return e.normalized()
+	if b.target != null and b.target.alive:
+		var tt: Vector2 = b.target.position - b.position
+		if tt.length() > 0.01:
+			return tt.normalized()
+	return Vector2.ZERO
+
 func _do_combat_movement(b: BrottState, base_spd: float) -> void:
 	var to_target: Vector2 = b.target.position - b.position
 	var dist: float = to_target.length()

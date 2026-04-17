@@ -2,6 +2,10 @@
 class_name GameState
 extends RefCounted
 
+## S14.1: fires exactly once on the false→true edge of a league-unlock flag.
+## Payload is the league id being unlocked (e.g. "bronze").
+signal league_unlocked(league_id: String)
+
 ## Economy
 var bolts: int = 0
 
@@ -147,6 +151,9 @@ func apply_match_result(won: bool, opponent_id: String) -> int:
 
 func _check_progression() -> void:
 	if current_league == "scrapyard":
+		# S14.1: edge-detect false→true so league_unlocked emits exactly once,
+		# even if apply_match_result is called again after the 3rd scrapyard win.
+		var was_unlocked := bronze_unlocked
 		var all_beaten := true
 		for i in 3:
 			if ("scrapyard_%d" % i) not in opponents_beaten:
@@ -155,6 +162,15 @@ func _check_progression() -> void:
 		if all_beaten:
 			bronze_unlocked = true
 			brottbrain_unlocked = true
+			if not was_unlocked:
+				emit_signal("league_unlocked", "bronze")
+
+## S14.1: transition current_league past scrapyard once the bronze moment
+## ceremony has been shown. Caller (game_main) also clears its pending-
+## ceremony flag; we no-op if already advanced.
+func advance_league() -> void:
+	if current_league == "scrapyard" and bronze_unlocked:
+		current_league = "bronze"
 
 ## S13.6: Apply a resolved trick choice (data-driven). Caller owns the modal
 ## lifecycle; GameState only mutates session state.

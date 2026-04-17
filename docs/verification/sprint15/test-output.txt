@@ -1,0 +1,727 @@
+=== test_runner.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== BattleBrotts Test Suite ===
+
+--- Data Validation ---
+--- Damage Formula ---
+--- Combat Simulation ---
+--- Module Tests ---
+--- Movement Tests ---
+
+--- Sprint 10 Tests ---
+
+=== Results: 72 passed, 0 failed, 72 total ===
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2378)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:614)
+[test_runner.gd exit=0]
+=== test_sprint11_2.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== BattleBrotts Sprint 11.2 Test Suite ===
+=== Juke Bugfix + Instrumentation ===
+
+
+-- Away Juke Cap (direct test) --
+  PASS: backup_distance capped: 0.0 px (max 32)
+
+-- Away Juke Cap (100 seeds) --
+  FAIL: No moonwalk violations (7/100)
+
+-- Hit Rate Instrumentation --
+  PASS: Hit rates recorded for 1 weapon(s)
+  PASS: Hit rate for Plasma Cutter: 0.42 (valid range)
+  PASS: Total shots fired: 38 (>0)
+
+-- TTK Instrumentation --
+  PASS: First engagement tick recorded: 9
+  PASS: TTK recorded for 1 bot(s)
+  PASS: TTK for Scout_1: 9.1s (non-negative)
+
+-- Regression Summary --
+  PASS: Batch has 20 sims
+  PASS: Batch has win_rates
+  PASS: Batch has avg_ttk_sec: 10.5s
+  PASS: Batch has avg_hit_rates
+  Regression baseline: { "total_sims": 20, "win_rates": { 0: 8, 1: 12 }, "avg_ttk_sec": 10.53, "avg_hit_rates": { "Plasma Cutter": 0.46997191299655 } }
+
+--- Results ---
+11 passed, 1 failed out of 12
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2378)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:614)
+[test_sprint11_2.gd exit=0]
+=== test_sprint12_1.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== BattleBrotts Sprint 12.1 Test Suite ===
+=== Movement Physics + Balance Tuning ===
+
+
+[Test] Chassis accel/decel/turn values
+  PASS: Scout accel = 660
+  PASS: Scout decel = 880
+  PASS: Scout turn_speed = 360
+  PASS: Brawler accel = 240
+  PASS: Brawler decel = 360
+  PASS: Brawler turn_speed = 240
+  PASS: Fortress accel = 90
+  PASS: Fortress decel = 150
+  PASS: Fortress turn_speed = 150
+
+[Test] Scout reaches max speed in ~0.33s
+  FAIL: Scout 0→max in ~0.33s (got 0.4000, expected 0.3300, eps 0.0500)
+  PASS: Scout at max speed 220 (got 220.0000, expected 220.0000, eps 0.0100)
+
+[Test] Brawler reaches max speed in ~0.50s
+  PASS: Brawler 0→max in ~0.50s (got 0.5000, expected 0.5000, eps 0.0500)
+
+[Test] Fortress reaches max speed in ~0.67s
+  PASS: Fortress 0→max in ~0.67s (got 0.7000, expected 0.6700, eps 0.0500)
+
+[Test] Afterburner multiplies accel by 1.8x
+  PASS: Afterburner accel = 660*1.8 = 1188 (got 1188.0000, expected 1188.0000, eps 0.0100)
+  PASS: Afterburner decel unchanged = 880 (got 880.0000, expected 880.0000, eps 0.0100)
+
+[Test] Deceleration stops bot correctly
+  FAIL: Scout stops in ~0.25s (got 0.3000, expected 0.2500, eps 0.0500)
+  PASS: Scout fully stopped
+
+[Test] Plasma Cutter fires at 2.5 tiles
+  PASS: Plasma Cutter fires at 2.5 tiles
+
+[Test] Plasma Cutter does NOT fire at 2.6 tiles
+  FAIL: Plasma Cutter does NOT fire at 2.6 tiles
+
+[Test] 1v1 overtime triggers at 45s
+  PASS: No overtime before 45s (tick 449)
+  PASS: Overtime active at 45s (tick 450)
+
+[Test] 2v2 overtime triggers at 60s
+  PASS: No overtime at 45s for 2v2
+  PASS: Overtime active at 60s for 2v2 (tick 600)
+
+[Test] 1v1 sudden death triggers at 60s
+  PASS: No sudden death before 60s (tick 599)
+  PASS: Sudden death at 60s (tick 600)
+
+[Test] 2v2 sudden death triggers at 75s
+  PASS: No sudden death at 60s for 2v2
+  PASS: Sudden death at 75s for 2v2 (tick 750)
+
+[Test] 1v1 timeout at 100s
+  PASS: 1v1 match over at 100s
+
+[Test] 2v2 timeout at 120s
+  FAIL: 2v2 match NOT over at 100s
+  PASS: 2v2 match over at 120s
+
+--- Results ---
+26 passed, 4 failed out of 30
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2378)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:614)
+[test_sprint12_1.gd exit=0]
+=== test_sprint12_2.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== BattleBrotts Sprint 12.2 Test Suite ===
+=== Loadout UI: Equipped State + Weight Bar ===
+
+
+[Test] Equipped card styling
+  PASS: Equipped card has panel stylebox
+  PASS: Equipped bg is bright blue (#4A90D9)
+  PASS: Equipped has glow border
+  PASS: Equipped has 2px drop shadow
+  PASS: Equipped has border width
+  PASS: Equipped card has checkmark badge
+  PASS: Equipped text is white
+  PASS: Equipped state in tooltip for accessibility
+
+[Test] Unequipped card styling
+  PASS: Unequipped card has panel stylebox
+  PASS: Unequipped bg is dark grey (#3A3A3A)
+  PASS: Unequipped has no border
+  PASS: Unequipped has no shadow
+  PASS: Unequipped card has no checkmark
+  PASS: Unequipped text is grey
+
+[Test] Weight bar updates correctly
+  PASS: Scout weight cap is 30
+  FAIL: Plasma Cutter (8) + Plating (5) = 13 kg
+  PASS: Weight increases after equipping Minigun
+
+[Test] Weight bar color changes at thresholds
+  PASS: 50% ratio -> green
+  PASS: 70% ratio -> green (boundary)
+  PASS: 71% ratio -> yellow
+  PASS: 90% ratio -> yellow (boundary)
+  PASS: 91% ratio -> red
+  PASS: 100% ratio -> red
+
+[Test] Overweight blocks equipping
+  PASS: Loadout is overweight (weight=73, cap=55)
+  PASS: Validation fails when overweight
+  PASS: Cannot equip more weapons when overweight
+  PASS: Can un-equip when overweight
+
+[Test] Empty slot indicators
+  PASS: Empty slot has label
+  PASS: Empty slot shows '+' icon
+  PASS: Empty slot shows slot type
+  PASS: Empty slot has panel style
+  PASS: Empty slot has border (dashed outline)
+  PASS: Empty slot is transparent (outline only)
+
+--- Results ---
+32 passed, 1 failed out of 33
+WARNING: 6 RIDs of type "CanvasItem" were leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2679)
+ERROR: 1 RID allocations of type 'PN13RendererDummy14TextureStorage12DummyTextureE' were leaked at exit.
+ERROR: 8 RID allocations of type 'PN18TextServerAdvanced22ShapedTextDataAdvancedE' were leaked at exit.
+ERROR: 1 RID allocations of type 'PN18TextServerAdvanced12FontAdvancedE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2378)
+[test_sprint12_2.gd exit=0]
+=== test_sprint12_3.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== BattleBrotts Sprint 12.3 Test Suite ===
+=== Visual Loadout: Bot Preview + Equipment Sprites ===
+
+
+[Test] Bot preview updates on equip/unequip
+  PASS: No weapons initially
+  PASS: No armor initially
+  PASS: No modules initially
+  PASS: Two weapons after equip
+  PASS: Plating equipped
+  PASS: One module equipped
+  PASS: One weapon after unequip
+
+[Test] All 7 weapons have distinct silhouettes
+  PASS: Minigun has distinct silhouette definition
+  PASS: Railgun has distinct silhouette definition
+  PASS: Shotgun has distinct silhouette definition
+  PASS: Missile Pod has distinct silhouette definition
+  PASS: Plasma Cutter has distinct silhouette definition
+  PASS: Arc Emitter has distinct silhouette definition
+  PASS: Flak Cannon has distinct silhouette definition
+  PASS: All 7 weapon types covered
+
+[Test] All 3 armor types change appearance
+  PASS: Plating sets distinct armor appearance
+  PASS: Reactive Mesh sets distinct armor appearance
+  PASS: Ablative Shell sets distinct armor appearance
+  PASS: All 3 armor types covered
+
+[Test] All 6 modules show colored indicator lights
+  PASS: Overclock has correct indicator color
+  PASS: Repair Nanites has correct indicator color
+  PASS: Shield Projector has correct indicator color
+  PASS: Sensor Array has correct indicator color
+  PASS: Afterburner has correct indicator color
+  PASS: EMP Charge has correct indicator color
+  PASS: All 6 module types covered
+
+[Test] Equip animation triggers
+  PASS: Equip anim queued
+  PASS: Equip duration is 0.3s
+  PASS: Nod animation triggered on equip
+
+[Test] Unequip animation triggers
+  PASS: Unequip anim queued
+  PASS: Unequip duration is 0.2s
+
+[Test] In-game sprites reflect equipment
+  PASS: BrottState carries 2 weapon types for rendering
+  PASS: BrottState carries armor type for rendering
+  PASS: First weapon is Minigun
+  PASS: Second weapon is Shotgun
+  PASS: Arena renderer _draw_ingame_weapons method exists (code review verified)
+
+[Test] Preview works for all 3 chassis
+  PASS: Preview renders Scout chassis
+  PASS: Preview renders Brawler chassis
+  PASS: Preview renders Fortress chassis
+
+[Test] Heavy equip triggers weight sink animation
+  PASS: Heavy equip anim queued
+  PASS: Weight sink timer active for heavy item
+  PASS: Nod also triggered for heavy equip
+
+--- Results ---
+42 passed, 0 failed out of 42
+[test_sprint12_3.gd exit=0]
+=== test_sprint12_4.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== BattleBrotts Sprint 12.4 Test Suite ===
+=== Charm Pass: Idle Anims, Movement Quirks, Victory/Defeat, Combat Flavor ===
+
+
+[Test] Scout idle: hover-bob 1px, 0.8s cycle
+  PASS: Scout idle offset 0 at t=0
+  PASS: Scout idle offset ~1.0 at quarter cycle (0.2s)
+  PASS: Scout idle amplitude <= 1px (got 1.000)
+  PASS: Scout idle is vertical
+
+[Test] Brawler idle: side-to-side rock 1px, 1.2s cycle
+  PASS: Brawler idle offset 0 at t=0
+  PASS: Brawler idle offset ~1.0 at quarter cycle
+  PASS: Brawler idle amplitude <= 1px (got 1.000)
+
+[Test] Fortress idle: breathing 0.5px, 2.0s cycle
+  PASS: Fortress idle offset 0 at t=0
+  PASS: Fortress idle offset ~0.5 at quarter cycle
+  PASS: Fortress idle amplitude <= 0.5px (got 0.499)
+
+[Test] Brawler idle is horizontal, others vertical
+  PASS: Brawler idle is horizontal
+  PASS: Scout idle is not horizontal
+  PASS: Fortress idle is not horizontal
+
+[Test] Scout spin: ~10% chance on direction change
+  PASS: Scout spin rate ~10% (got 9.6%)
+
+[Test] Brawler dust puff particles on standstill→move
+  PASS: Dust puff creates 4 particles (got 4)
+  PASS: Dust puff lifetime = 18 frames (0.3s)
+  PASS: Dust puff spawns at feet (y > center)
+
+[Test] Fortress gear-grinding particle on deceleration
+  PASS: Gear particle lifetime = 12 frames
+  PASS: Gear particle moves opposite to velocity
+
+[Test] Victory anim: win (spin + 4px jump)
+  PASS: Win anim duration = 0.3s
+  PASS: Win anim type correct
+  PASS: Mid-win: rotation in progress (180.0°)
+  PASS: Mid-win: jumping up (offset=-4.0)
+
+[Test] Victory anim: perfect win (double spin + 6px jump)
+  PASS: Perfect win duration = 0.5s
+  PASS: Mid-perfect: double spin in progress (360.0°)
+  PASS: Mid-perfect: big jump (offset=-6.0)
+
+[Test] Victory anim: close win (<20% HP, wobbly spin)
+  PASS: Close win duration = 0.4s
+  PASS: Mid-close: spinning (180.0°)
+  PASS: Close win: wobble amplitude <= 1.5px
+
+[Test] Victory anim: loss (slump down 2px)
+  PASS: Loss anim duration = 0.5s
+  PASS: Loss anim resets at end
+
+[Test] Smoke particles trail below 25% HP
+  PASS: Smoke particle lifetime = 24 frames (0.4s)
+  PASS: Smoke particle is semi-transparent
+  PASS: Smoke drifts upward
+
+[Test] Crit received: 2px visual recoil
+  PASS: Recoil offset = 2px
+  PASS: Recoil pushes away from attacker
+
+[Test] Module activation ring colors match module type
+  PASS: Overclock = orange
+  PASS: Shield = blue
+  PASS: EMP = purple
+
+[Test] Charm animations do NOT affect gameplay state
+  PASS: Winner same: 1 vs 1
+  PASS: Tick count same: 69 vs 69
+  PASS: Bot A HP same: 0.0 vs 0.0
+  PASS: Bot B HP same: 168.3 vs 168.3
+  PASS: Bot A position same
+  PASS: Bot B position same
+
+--- Results ---
+45 passed, 0 failed out of 45
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2378)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:614)
+[test_sprint12_4.gd exit=0]
+=== test_sprint12_5.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== BattleBrotts Sprint 12.5 Test Suite ===
+=== JSON Match Logging ===
+
+
+[Test] json_log_enabled=false produces no log
+  PASS: Log is empty when disabled
+
+[Test] json_log_enabled=true captures ticks
+  PASS: Log has 50 entries for 50 ticks (got 50)
+  PASS: First entry tick == 1
+  PASS: Last entry tick == 50
+
+[Test] Log contains correct bot state fields
+  PASS: Entry has 'tick'
+  PASS: Entry has 'bots'
+  PASS: Entry has 'events'
+  PASS: Entry has 'match_state'
+  PASS: match_state is 'in_progress'
+  PASS: 2 bots in entry
+  PASS: Bot state has 'id'
+  PASS: Bot state has 'position_x'
+  PASS: Bot state has 'position_y'
+  PASS: Bot state has 'hp'
+  PASS: Bot state has 'max_hp'
+  PASS: Bot state has 'energy'
+  PASS: Bot state has 'current_speed'
+  PASS: Bot state has 'stance'
+  PASS: Bot state has 'target_id'
+  PASS: Bot state has 'facing_angle'
+
+[Test] Events capture weapon_fired and damage_dealt
+  PASS: Found weapon_fired event in log
+  PASS: Found damage_dealt event in log
+
+[Test] Log file write works
+  PASS: Can open file for writing
+  PASS: Can read file back
+  PASS: Written JSON is valid
+  PASS: Parsed data is Array
+  PASS: Written log has 10 entries (got 10)
+
+--- Results ---
+27 passed, 0 failed out of 27
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2378)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:614)
+[test_sprint12_5.gd exit=0]
+=== test_sprint13_10.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== Sprint 13.10 Pre-Stage Tests (empty-pool + weight-cap) ===
+
+
+=== Results: 5 passed, 0 failed, 5 total ===
+[test_sprint13_10.gd exit=0]
+=== test_sprint13_2.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== BattleBrotts Sprint 13.2 Test Suite ===
+=== TCR Combat Rhythm ===
+
+
+-- TCR Cycle Timing (4-6 cycles per 30s) --
+  PASS: Avg TCR cycles in 30s: 1.8 (expected 1-10)
+
+-- Orbit Speed ~55% of base --
+  PASS: Orbit speed ratio: 0.55 (expected ~0.55)
+
+-- Commit Closes Distance --
+  PASS: Commit closed distance in 49/50 sims (expected ≥20)
+
+-- Recovery Increases Distance --
+  PASS: Recovery increased distance in 50/50 sims (expected ≥25)
+
+-- Match Length: 1v1 in 30-60s range (100 sims) --
+    Avg match duration: 44.0s
+  PASS: Matches in 10-100s: 100/100 (expected ≥50)
+
+-- Backup Distance Cap in Recovery --
+  PASS: Backup distance cap respected during RECOVERY
+
+-- Approach Speed at 80% --
+  PASS: Bot entered combat quickly (approach phase was short)
+
+-- JSON Log Captures TCR Phases --
+  PASS: JSON log has TENSION phase events
+  PASS: JSON log has COMMIT phase events
+  PASS: JSON log has RECOVERY phase events
+  PASS: JSON log bot states include combat_phase field
+
+--- Results ---
+11 passed, 0 failed out of 11
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2378)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:614)
+[test_sprint13_2.gd exit=0]
+=== test_sprint13_3.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== Sprint 13.3 Cross-Chassis Matchup Tests (N=30 each) ===
+
+
+--- Scout vs Scout ---
+    Team0 wins: 16, Team1 wins: 14, Draws: 0
+    Win rate (side A): 53.3%
+    Avg match length: 11.8s
+    Hit rate (per-shot):   45.4% (615/1354)
+    Hit rate (per-pellet): 45.4% (615/1354)
+  PASS: Scout vs Scout: no crash
+  PASS: Scout vs Scout: per-shot hit rate 45.4% <= 100%
+  PASS: Scout vs Scout: per-pellet hit rate 45.4% <= 100%
+  PASS: Scout vs Scout: pellets_fired (1354) >= shots_fired (1354)
+  PASS: Scout vs Scout: avg duration 11.8s >= 3s (no instant-kill regression)
+  PASS: Scout vs Scout (mirror): WR 53.3% in [35%, 65%]
+
+--- Brawler vs Brawler ---
+    Team0 wins: 13, Team1 wins: 13, Draws: 4
+    Win rate (side A): 50.0%
+    Avg match length: 10.1s
+    Hit rate (per-shot):   95.3% (656/688)
+    Hit rate (per-pellet): 61.1% (2101/3440)
+  PASS: Brawler vs Brawler: no crash
+  PASS: Brawler vs Brawler: per-shot hit rate 95.3% <= 100%
+  PASS: Brawler vs Brawler: per-pellet hit rate 61.1% <= 100%
+  PASS: Brawler vs Brawler: pellets_fired (3440) >= shots_fired (688)
+  PASS: Brawler vs Brawler: avg duration 10.1s >= 3s (no instant-kill regression)
+  PASS: Brawler vs Brawler (mirror): WR 50.0% in [35%, 65%]
+
+--- Fortress vs Fortress ---
+    Team0 wins: 15, Team1 wins: 15, Draws: 0
+    Win rate (side A): 50.0%
+    Avg match length: 43.8s
+    Hit rate (per-shot):   75.4% (6258/8298)
+    Hit rate (per-pellet): 75.4% (6258/8298)
+  PASS: Fortress vs Fortress: no crash
+  PASS: Fortress vs Fortress: per-shot hit rate 75.4% <= 100%
+  PASS: Fortress vs Fortress: per-pellet hit rate 75.4% <= 100%
+  PASS: Fortress vs Fortress: pellets_fired (8298) >= shots_fired (8298)
+  PASS: Fortress vs Fortress: avg duration 43.8s >= 3s (no instant-kill regression)
+  PASS: Fortress vs Fortress (mirror): WR 50.0% in [35%, 65%]
+
+--- Scout vs Brawler ---
+    Team0 wins: 12, Team1 wins: 17, Draws: 1
+    Win rate (side A): 41.4%
+    Avg match length: 9.6s
+    Hit rate (per-shot):   81.6% (708/868)
+    Hit rate (per-pellet): 54.2% (1213/2236)
+  PASS: Scout vs Brawler: no crash
+  PASS: Scout vs Brawler: per-shot hit rate 81.6% <= 100%
+  PASS: Scout vs Brawler: per-pellet hit rate 54.2% <= 100%
+  PASS: Scout vs Brawler: pellets_fired (2236) >= shots_fired (868)
+  PASS: Scout vs Brawler: avg duration 9.6s >= 3s (no instant-kill regression)
+
+--- Scout vs Fortress ---
+    Team0 wins: 30, Team1 wins: 0, Draws: 0
+    Win rate (side A): 100.0%
+    Avg match length: 13.1s
+    Hit rate (per-shot):   56.9% (1102/1938)
+    Hit rate (per-pellet): 56.9% (1102/1938)
+  PASS: Scout vs Fortress: no crash
+  PASS: Scout vs Fortress: per-shot hit rate 56.9% <= 100%
+  PASS: Scout vs Fortress: per-pellet hit rate 56.9% <= 100%
+  PASS: Scout vs Fortress: pellets_fired (1938) >= shots_fired (1938)
+  PASS: Scout vs Fortress: avg duration 13.1s >= 3s (no instant-kill regression)
+
+--- Brawler vs Fortress ---
+    Team0 wins: 30, Team1 wins: 0, Draws: 0
+    Win rate (side A): 100.0%
+    Avg match length: 14.4s
+    Hit rate (per-shot):   74.0% (1309/1770)
+    Hit rate (per-pellet): 66.6% (2462/3694)
+  PASS: Brawler vs Fortress: no crash
+  PASS: Brawler vs Fortress: per-shot hit rate 74.0% <= 100%
+  PASS: Brawler vs Fortress: per-pellet hit rate 66.6% <= 100%
+  PASS: Brawler vs Fortress: pellets_fired (3694) >= shots_fired (1770)
+  PASS: Brawler vs Fortress: avg duration 14.4s >= 3s (no instant-kill regression)
+
+--- Results ---
+33 passed, 0 failed
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2378)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:614)
+[test_sprint13_3.gd exit=0]
+=== test_sprint13_4.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== Sprint 13.4 Shop Card Grid Tests ===
+
+test_columns_desktop
+test_columns_mobile
+test_card_dimensions
+test_section_order
+test_all_items_present
+test_bolts_counter_font_size
+test_continue_signal_contract
+test_unaffordable_price_color
+test_owned_state_rendering
+test_archetype_tag_format
+test_expand_card_inline
+test_only_one_card_expanded
+test_buy_flow
+test_buy_button_disabled_when_unaffordable
+test_armor_archetype_values
+
+=== Results: 42 passed, 0 failed, 42 total ===
+[test_sprint13_4.gd exit=0]
+=== test_sprint13_5.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== Sprint 13.5 Shop Polish Tests (Spawn A) ===
+
+D2: SFX constants exist and are strings
+D2: _play_sfx tolerates missing resource path (no crash)
+D0: price=0 item renders BUY label as 'TAKE (Free)'
+D1: buy button has scale property usable by tween
+D1: scale tween can be created and stepped
+D3: first _build_ui marks all items as new (pulse count > 0)
+D3: second _build_ui with no catalog change produces zero new pulses
+D3: tapping a pulsing card cancels its pulse tween
+FIX: _shop_audio survives repeated _build_ui() calls
+FIX: _seen_shop_items (static) persists across ShopScreen instances
+
+=== Results: 32 passed, 0 failed, 32 total ===
+[test_sprint13_5.gd exit=0]
+=== test_sprint13_6.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== Sprint 13.6 Trick Choice Tests (Nutts-B) ===
+
+Data: TRICKS contains the 3 required ids
+AC#4: rusty_launcher.choice_b (BOLTS_DELTA +10) applies
+AC#4: rusty_launcher.choice_a (NEXT_FIGHT_PELLET_MOD +1)
+AC#5: risk_for_reward.choice_a applies both effect_type + effect_type_2
+AC#5: scavenger_kid.choice_a applies ITEM_GRANT stub + BOLTS_DELTA -5
+AC#4: HP_DELTA routes to _pending_hp_delta (GameState has no hp field)
+AC#7: _tricks_seen receives trick id after resolution
+AC#8: pick_unseen_trick returns an unseen trick when pool has unseen
+AC#9: exhausted pool falls back to full TRICKS (no crash, not empty)
+Run-reset: clear_run_state() wipes trick session state
+WIRE: build_brott() applies _pending_hp_delta to BrottState.hp/max_hp
+WIRE: build_brott() carries _next_fight_pellet_mod into BrottState.pellet_mod
+WIRE: build_brott() clears pending effects so they don't leak to next match
+WIRE: HP_DELTA can't drop max_hp below 1
+WIRE: combat_sim applies BrottState.pellet_mod with floor of 1
+Smoke: trick_choice_modal.tscn instantiates, show_trick callable, resolved signal exists
+Integration: ShopScreen outside Scrapyard builds grid without modal
+Integration: _trick_shown flag prevents modal re-trigger on rebuilds
+
+=== Results: 61 passed, 0 failed, 61 total ===
+[test_sprint13_6.gd exit=0]
+=== test_sprint13_7.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== Sprint 13.7 Item Token Router Tests (Nutts-A) ===
+
+Test 1: resolve_token("plating") → CAT_ARMOR + PLATING
+Test 2: resolve_token("minigun") → CAT_WEAPON + MINIGUN
+Test 3: resolve_token("random_weak") → category in {weapon, armor, module}
+Test 4: resolve_token("random_module") → CAT_MODULE
+Test 5: resolve_token("bogus_token") → {}
+Test 6: display_name returns non-empty for every random_weak pool entry
+Test 7: _grant_trick_item("minigun") appends to owned_weapons
+Test 8: _grant_trick_item grants armor and module to correct arrays
+Test 9: _grant_trick_item("random_module") adds to owned_modules
+Test 10: _grant_trick_item is idempotent — no duplicate entries
+Test 11: _lose_trick_item removes item from correct array
+Test 12: _lose_trick_item is safe no-op on missing item or bogus token
+Test 13: crate_find.choice_a grants a real item via ITEM_GRANT
+Test 14: toll_goblin.choice_a applies ITEM_LOSE + BOLTS_DELTA secondary
+Test 15: scrap_trader.choice_a costs 15 bolts and grants a module
+Test 15b: scavenger_kid.choice_a now grants a real item (S13.6 F1 unblocked)
+Test 16: empty-pool / unknown-token guard (no infinite loop, no retry)
+  PASS: 500 random_weak resolutions all non-empty
+
+=== Results: 74 passed, 0 failed, 74 total ===
+[test_sprint13_7.gd exit=0]
+=== test_sprint13_8_modal_hardening.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== Sprint 13.8 Modal Hardening Tests (Nutts-A) ===
+
+Source: modal declares _trick_shown guard field
+Source: guard check occurs before any @onready node access in show_trick
+Behavior: bare-script modal has _trick_shown=false by default
+Behavior: with _trick_shown=true, show_trick() returns before touching nodes
+Source: shop_screen.gd places queue_free() before apply_trick_choice()
+Source: shop_screen.gd comments reference S13.8 swap rationale
+Apply: good choice_key mutates _tricks_seen
+
+=== Results: 15 passed, 0 failed, 15 total ===
+[test_sprint13_8_modal_hardening.gd exit=0]
+=== test_sprint13_8_toast.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== Sprint 13.8 Item-Name Toast Tests (Nutts-B) ===
+
+
+=== Results: 12 passed, 0 failed, 12 total ===
+[test_sprint13_8_toast.gd exit=0]
+=== test_sprint13_9.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== Sprint 13.9 Opponent Loadouts Tests (Nutts-A) ===
+
+
+=== Results: 17 passed, 0 failed, 17 total ===
+[test_sprint13_9.gd exit=0]
+=== test_sprint14_1.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== Sprint 14.1 Tests (bronze moment + concede) ===
+
+
+=== Results: 19 passed, 0 failed, 19 total ===
+[test_sprint14_1.gd exit=0]
+=== test_sprint14_1_nav.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== Sprint 14.1-B Wall-stuck Nav Tests ===
+
+
+=== Results: 5 passed, 0 failed, 5 total ===
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2378)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:614)
+[test_sprint14_1_nav.gd exit=0]
+=== test_sprint10.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+SCRIPT ERROR: Parse Error: Cannot infer the type of "d" variable because the value doesn't have a set type.
+          at: GDScript::reload (res://tests/test_sprint10.gd:87)
+ERROR: Failed to load script "res://tests/test_sprint10.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript.cpp:3022)
+[test_sprint10.gd exit=0]
+=== test_sprint11.gd ===
+Godot Engine v4.4.1.stable.official.49a5bc7b6 - https://godotengine.org
+
+=== BattleBrotts Sprint 11.1 Test Suite ===
+=== Combat Movement System ===
+
+
+-- AC1: No Overlap Stalemate (1000 sims) --
+  PASS: 0% stalemate rate (got 0/1000)
+
+-- AC2: Movement During Combat --
+  PASS: Avg distance traveled: 46.2 tiles (need >5)
+
+-- AC5: Position Change Every 3 Seconds --
+  PASS: No bots stationary >3s during combat (0 violations)
+
+-- AC6: No Moonwalking (backup >1 tile) --
+  PASS: No moonwalking violations (7/100)
+
+-- AC7: Existing Stances Preserved --
+  PASS: Kiting stance runs without crash
+  PASS: Defensive stance runs without crash
+  PASS: Ambush bot does not enter combat movement
+
+-- Separation Force (32px threshold) --
+  PASS: Bots separated after overlap: 61.8 px apart
+
+-- Engagement Distances --
+  PASS: Aggressive bot enters combat movement state
+
+--- Results ---
+9 passed, 0 failed out of 9
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2378)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:614)
+[test_sprint11.gd exit=0]

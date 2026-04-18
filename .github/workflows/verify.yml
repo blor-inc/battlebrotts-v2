@@ -3,19 +3,58 @@ name: Verify
 on:
   pull_request:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - 'sprints/**'
-      - '**/*.md'
+  # Note: paths-ignore removed intentionally. These jobs are required status
+  # checks on main. If they don't run on doc-only PRs, auto-merge for those
+  # PRs (e.g. the readme-status auto-update PR) will block forever. Instead
+  # we always start the jobs, but short-circuit with success for PRs that
+  # only touch docs/sprints/markdown.
 
 jobs:
-  godot-tests:
-    name: Godot Unit Tests
+  changes:
+    name: Detect changed paths
     runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: filter
+        name: Check if PR touches non-doc code
+        run: |
+          set -euo pipefail
+          base_sha="${{ github.event.pull_request.base.sha }}"
+          head_sha="${{ github.event.pull_request.head.sha }}"
+          # List changed files. Anything outside docs/**, sprints/**, and
+          # markdown counts as "code" and must run the full verify suite.
+          code_changed="false"
+          while IFS= read -r f; do
+            case "$f" in
+              docs/*|sprints/*|*.md) ;;
+              "") ;;
+              *) code_changed="true" ;;
+            esac
+          done < <(git diff --name-only "$base_sha" "$head_sha")
+          echo "code=$code_changed" >> "$GITHUB_OUTPUT"
+          echo "PR touches code: $code_changed"
+
+  godot-tests:
+    name: Godot Unit Tests
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Short-circuit on doc-only PR
+        if: needs.changes.outputs.code != 'true'
+        run: |
+          echo "Doc-only PR — skipping Godot tests and reporting success."
+          exit 0
+
+      - uses: actions/checkout@v4
+        if: needs.changes.outputs.code == 'true'
 
       - name: Install Godot
+        if: needs.changes.outputs.code == 'true'
         run: |
           wget -q https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip
           unzip -q Godot_v4.4.1-stable_linux.x86_64.zip
@@ -23,9 +62,11 @@ jobs:
           sudo mv Godot_v4.4.1-stable_linux.x86_64 /usr/local/bin/godot
 
       - name: Import Godot resources
+        if: needs.changes.outputs.code == 'true'
         run: godot --headless --path godot/ --import 2>&1 || true
 
       - name: Run Godot tests
+        if: needs.changes.outputs.code == 'true'
         run: |
           set -e
           godot --headless --path godot/ --script res://tests/test_runner.gd
@@ -36,20 +77,31 @@ jobs:
 
   playwright:
     name: Playwright Smoke Tests
+    needs: changes
     runs-on: ubuntu-latest
     steps:
+      - name: Short-circuit on doc-only PR
+        if: needs.changes.outputs.code != 'true'
+        run: |
+          echo "Doc-only PR — skipping Playwright smoke tests and reporting success."
+          exit 0
+
       - uses: actions/checkout@v4
+        if: needs.changes.outputs.code == 'true'
 
       - uses: actions/setup-node@v4
+        if: needs.changes.outputs.code == 'true'
         with:
           node-version: 20
 
       - name: Install dependencies
+        if: needs.changes.outputs.code == 'true'
         run: |
           npm install @playwright/test serve
           npx playwright install --with-deps chromium
 
       - name: Prepare site for testing
+        if: needs.changes.outputs.code == 'true'
         run: |
           mkdir -p _site/game
           cp index.html data.json _site/
@@ -60,10 +112,11 @@ jobs:
           fi
 
       - name: Run Playwright tests
+        if: needs.changes.outputs.code == 'true'
         run: npx playwright test
 
       - name: Upload screenshots
-        if: always()
+        if: always() && needs.changes.outputs.code == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: playwright-screenshots

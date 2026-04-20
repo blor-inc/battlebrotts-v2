@@ -49,6 +49,7 @@ const SPRINT_TEST_FILES := [
 	"res://tests/test_sprint17_1_loadout_overlap.gd",
 	"res://tests/test_sprint17_1_visible_tooltips.gd",
 	"res://tests/test_sprint17_1_first_encounter_hud.gd",
+	"res://tests/test_sprint17_1_random_event_popup.gd",
 ]
 
 var file_pass_count := 0

@@ -13,9 +13,9 @@ Build autonomous combat Brotts, teach them how to fight with drag-and-drop Behav
 
 **Current sprint:** [Sprint 16 — Tech Debt Cleanup + Infrastructure Health](./sprints/sprint-16.md)
 
-**Backlog** (0 total · [view all](https://github.com/brott-studio/battlebrotts-v2/issues?q=is%3Aissue+label%3Abacklog+is%3Aopen))
-- 🎵 Audio 0 · 🎨 Art 0 · ✨ UX 0 · 🎮 Gameplay 0 · 🔧 Tech-Debt 0 · 🏗️ Framework 0
-- 🔴 High 0 · 🟡 Mid 0 · 🔵 Low 0
+**Backlog** (31 total · [view all](https://github.com/brott-studio/battlebrotts-v2/issues?q=is%3Aissue+label%3Abacklog+is%3Aopen))
+- 🎵 Audio 4 · 🎨 Art 5 · ✨ UX 8 · 🎮 Gameplay 7 · 🔧 Tech-Debt 5 · 🏗️ Framework 2
+- 🔴 High 4 · 🟡 Mid 16 · 🔵 Low 11
 
 **Open PRs** (3)
 - [#93](https://github.com/brott-studio/battlebrotts-v2/pull/93) kb: S15.2 scope-gate enforcement pattern
@@ -29,7 +29,7 @@ Build autonomous combat Brotts, teach them how to fight with drag-and-drop Behav
 
 **Docs:** [GDD](./docs/gdd.md) · [Audio Vision](./docs/kb/audio-vision.md) · [UX Vision](./docs/kb/ux-vision.md) · [Pipeline](https://github.com/brott-studio/studio-framework/blob/main/PIPELINE.md)
 
-_Last updated: 2026-04-18 05:06 UTC · [update log](../../actions/workflows/readme-status.yml)_
+_Last updated: 2026-04-20 02:39 UTC · [update log](../../actions/workflows/readme-status.yml)_
 <!-- STATUS-END -->
 
 ## Links

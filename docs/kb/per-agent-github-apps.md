@@ -146,6 +146,34 @@ Observed in S16.2-003 redo: after Specc-App approved and CI went green, the repo
 - For pipelines where "merge actor = agent" matters in the audit trail, disable auto-merge on that PR or skip the approve step until merge-time.
 - For normal use, this is benign: Specc's approval review is the semantically meaningful audit row; auto-merge is mechanical.
 
+## Template for future Apps
+
+The S16.2 Specc App pattern generalizes to any pipeline agent that needs a distinct GitHub identity. This section is the HCD-facing condensed template; the full step-by-step walkthrough lives in §"Setup steps (HCD-facing playbook)" above.
+
+### 5-step playbook (condensed)
+
+1. **Create the App** — `brott-studio-<AGENT-NAME>` on the brott-studio org. Permissions: Contents R/W, Pull requests R/W, Metadata R. Webhook disabled. Only on this account.
+2. **Generate & install private key** — download `.pem` to `~/.config/gh/brott-studio-<AGENT-NAME>-app.pem` (mode `0600`). Install on target repos. Record App ID + Installation ID.
+3. **Deploy the token helper** — copy `~/bin/specc-gh-token` → `~/bin/<agent>-gh-token`, s/specc/<agent>/g (lowercase for paths, UPPER for env vars).
+4. **Wire into the agent profile** — export `<AGENT>_APP_ID` + `<AGENT>_INSTALLATION_ID`, call `~/bin/<agent>-gh-token` for `$TOKEN`, use for git push and API calls. Set git `user.name` / `user.email` to the `[bot]` identity.
+5. **Validate cross-actor flow** — run a PR end-to-end (different-actor authors, new App approves) and confirm HTTP 200. If the flow requires same-actor approval at any point, refactor — same-actor 422 is platform-level and **not** fixable by Apps (see ⚠️ finding above).
+
+### Conventions
+
+- **App name:** `brott-studio-<agent>` (lowercase).
+- **Env vars:** `<AGENT>_APP_ID`, `<AGENT>_INSTALLATION_ID` (UPPER).
+- **Token helper path:** `~/bin/<agent>-gh-token` (lowercase).
+- **PEM path:** `~/.config/gh/brott-studio-<agent>-app.pem`, mode `0600`.
+- **Cache path:** `/tmp/<agent>-gh-token.cache`, mode `0600`, 50-min TTL.
+- **Git identity:** `user.name="brott-studio-<agent>[bot]"`, `user.email="<app_user_id>+brott-studio-<agent>[bot]@users.noreply.github.com"`.
+- **Fallback rule:** helper failure → agent stops and reports. Never silently fall back to the shared PAT (defeats the audit-trail purpose).
+
+### Readiness: next candidate roles
+
+**Boltz (reviewer):** S16.3 surfaced the same 422 pattern on Boltz when using the shared PAT to file formal APPROVE reviews (PRs #153, #154). Benign today because branch protection counts reviews not APPROVE events — **blocker if protection tightens**. Next recommended App deployment when HCD has bandwidth.
+
+**Other formal-review-event roles:** any future agent that needs to generate distinct APPROVE events or commits should get its own App per this template. See the universal-self-approval finding in ⚠️ above — per-agent Apps are the only fix for cross-actor review flows across the pipeline.
+
 ## Cross-references
 
 - `docs/kb/shared-token-self-review-422.md` — original PAT 422 finding from S15.

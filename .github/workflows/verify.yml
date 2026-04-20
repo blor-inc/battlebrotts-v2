@@ -69,6 +69,7 @@ jobs:
         if: needs.changes.outputs.code == 'true'
         run: |
           set -e
+          bash godot/tests/quarantine_lint.sh
           godot --headless --path godot/ --script res://tests/test_runner.gd
           # S16.1-005: test_runner.gd now explicitly enumerates every
           # test_sprint*.gd file internally and aggregates per-file exit

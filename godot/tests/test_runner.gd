@@ -13,13 +13,18 @@ var test_count := 0
 # process; per-file exit codes are aggregated so a failure in one file
 # does NOT short-circuit the rest of the suite.
 #
-# Note: godot/tests/test_sprint{3,4,5,6}.gd exist in the tree but have
-# never been wired into CI (the old glob only matched 1[0-9]) and carry
-# real pre-existing failures against current game data. They are NOT
-# enumerated here because S16.1-005 is plumbing-only (must not change
-# which tests pass/fail) and S16 scope-gate forbids editing test files
-# to fix them. Separate backlog task required to triage + quarantine.
+# [S16.2-005] Sprint 3/4/5/6 test files have been triaged (issue #138):
+# every failing assertion was classified as stale-by-design (pre-S10 engine
+# assumptions superseded by current GDD canon) and retired in-place with a
+# GDD pointer comment. Zero (b) real-regression quarantines were added by
+# this task. Sprint 3/4/5/6 files now pass and are enumerated below so the
+# runner stops silently ignoring them (closes the silent-green-where-red
+# gap from the S16.1-005 deviation note).
 const SPRINT_TEST_FILES := [
+	"res://tests/test_sprint3.gd",
+	"res://tests/test_sprint4.gd",
+	"res://tests/test_sprint5.gd",
+	"res://tests/test_sprint6.gd",
 	"res://tests/test_sprint10.gd",
 	"res://tests/test_sprint11.gd",
 	"res://tests/test_sprint11_2.gd",

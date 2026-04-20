@@ -80,7 +80,12 @@ jobs:
           fi
 
           git add README.md
-          git commit -m "${TITLE} [skip ci]"
+          # Note: no `[skip ci]` suffix. Loop prevention is handled by
+          # `paths-ignore: [README.md]` on the push trigger above. `[skip ci]`
+          # also suppresses `pull_request` triggers, which starves the required
+          # status checks (verify.yml short-circuits) and leaves auto-merge
+          # blocked forever.
+          git commit -m "${TITLE}"
           git push --force-with-lease origin "$BRANCH"
 
           # Idempotent: reuse an open PR from this branch if one exists.

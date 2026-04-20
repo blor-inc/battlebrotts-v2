@@ -52,11 +52,15 @@ README = ROOT / "README.md"
 def _token_for(repo: str) -> str | None:
     """Pick the best token available for a given repo.
 
-    - Same repo: prefer GITHUB_TOKEN (CI default), else BROTT_STUDIO_PAT.
-    - Cross repo: require BROTT_STUDIO_PAT.
+    - Prefer BROTT_STUDIO_PAT when available: the fine-grained PAT has
+      `issues:read` + `pull-requests:read` across all studio repos, while
+      the workflow's `GITHUB_TOKEN` only has `contents:write` +
+      `pull-requests:write` declared and silently returns empty results
+      for `/repos/.../issues?labels=...` queries it can't authorize.
+    - Fall back to GITHUB_TOKEN (CI default) for same-repo calls.
     """
     if repo == REPO:
-        return os.environ.get("GITHUB_TOKEN") or os.environ.get("BROTT_STUDIO_PAT")
+        return os.environ.get("BROTT_STUDIO_PAT") or os.environ.get("GITHUB_TOKEN")
     return os.environ.get("BROTT_STUDIO_PAT")
 
 

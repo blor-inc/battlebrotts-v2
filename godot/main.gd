@@ -4,11 +4,21 @@ extends Node2D
 const ARENA_OFFSET := Vector2(384, 60)  # Center arena in 1280x720
 const TICKS_PER_SEC := 10
 
+# [S17.1-003] Energy-bar legend. COLOR_ENERGY mirrors arena_renderer.gd's
+# own constant (0.2, 0.7, 1.0) — duplicated here rather than imported so we
+# don't cross the sacred arena/** boundary. If arena_renderer.gd's tone ever
+# changes, update this value to match.
+const COLOR_ENERGY := Color(0.2, 0.7, 1.0)
+const ENERGY_LEGEND_TEXT := "⚡ Energy (blue bar) — powers weapons; regenerates over time."
+
 @onready var arena_renderer: Node2D = $ArenaRenderer
 @onready var speed_label: Label = $UI/SpeedLabel
 @onready var player_info: Label = $UI/PlayerInfo
 @onready var enemy_info: Label = $UI/EnemyInfo
 @onready var time_label: Label = $UI/TimeLabel
+@onready var _ui_layer: CanvasLayer = $UI
+
+var energy_legend: Label
 
 var sim: CombatSim
 var player_brott: BrottState
@@ -18,7 +28,25 @@ var speed_multiplier: float = 1.0
 var tick_accumulator: float = 0.0
 
 func _ready() -> void:
+	_setup_energy_legend()
 	_setup_match()
+
+# [S17.1-003] Add a persistent HUD legend so the blue energy bar has a
+# visible-by-default meaning. Static label, set once, never updated.
+func _setup_energy_legend() -> void:
+	if _ui_layer == null:
+		return
+	energy_legend = Label.new()
+	energy_legend.name = "EnergyLegend"
+	energy_legend.text = ENERGY_LEGEND_TEXT
+	energy_legend.add_theme_font_size_override("font_size", 13)
+	energy_legend.add_theme_color_override("font_color", COLOR_ENERGY)
+	# Positioned under PlayerInfo (which ends at y=40); above the arena band.
+	energy_legend.offset_left = 20.0
+	energy_legend.offset_top = 42.0
+	energy_legend.offset_right = 760.0
+	energy_legend.offset_bottom = 62.0
+	_ui_layer.add_child(energy_legend)
 
 func _setup_match() -> void:
 	# Create simulation

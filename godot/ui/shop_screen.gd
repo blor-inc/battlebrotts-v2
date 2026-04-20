@@ -426,6 +426,26 @@ func _build_card(it: Dictionary) -> Control:
 	tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(tag)
 
+	# [S17.1-003] Inline description — always visible, no hover required.
+	# Reads existing data["description"] field; em-dash fallback when empty.
+	# Full text remains available via existing expand-panel / hover path.
+	var data_dict: Dictionary = it["data"] if it.has("data") else {}
+	var desc_str: String = String(data_dict.get("description", ""))
+	if desc_str == "":
+		desc_str = "—"
+	var desc_lbl := Label.new()
+	desc_lbl.name = "Description"
+	desc_lbl.text = desc_str
+	desc_lbl.add_theme_font_size_override("font_size", 11)
+	desc_lbl.add_theme_color_override("font_color", COLOR_MUTED)
+	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc_lbl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	desc_lbl.clip_text = true
+	desc_lbl.position = Vector2(10, ART_H + 54)
+	desc_lbl.size = Vector2(CARD_W - 20, 32)
+	desc_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(desc_lbl)
+
 	# Price (bottom-right)
 	var price_lbl := Label.new()
 	price_lbl.name = "Price"

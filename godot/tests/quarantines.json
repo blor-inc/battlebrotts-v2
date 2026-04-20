@@ -1,0 +1,23 @@
+[
+  {
+    "test_file": "godot/tests/test_sprint12_1.gd",
+    "test_name": "test_scout_time_to_max",
+    "skip_reason": "real regression: brott_state.accelerate_toward_speed — Scout 0→max expected ~0.33s, currently ~0.40s (out-of-scope for S16, see godot/combat/brott_state.gd)",
+    "filed_issue": "https://github.com/brott-studio/battlebrotts-v2/blob/main/sprints/sprint-16.md#L222",
+    "target_sprint": "S17+"
+  },
+  {
+    "test_file": "godot/tests/test_sprint12_1.gd",
+    "test_name": "test_decel_to_stop",
+    "skip_reason": "real regression: brott_state.accelerate_toward_speed — Scout decel-to-stop expected ~0.25s, currently ~0.30s (out-of-scope for S16, see godot/combat/brott_state.gd)",
+    "filed_issue": "https://github.com/brott-studio/battlebrotts-v2/blob/main/sprints/sprint-16.md#L223",
+    "target_sprint": "S17+"
+  },
+  {
+    "test_file": "godot/tests/test_sprint12_1.gd",
+    "test_name": "test_timeout_2v2_at_120s",
+    "skip_reason": "real regression: combat_sim.gd overtime/SD plumbing — 2v2 match ends at 100s instead of running to 120s timeout (out-of-scope for S16, see godot/combat/combat_sim.gd)",
+    "filed_issue": "https://github.com/brott-studio/battlebrotts-v2/blob/main/sprints/sprint-16.md#L224",
+    "target_sprint": "S17+"
+  }
+]

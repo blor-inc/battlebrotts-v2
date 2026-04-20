@@ -3,6 +3,16 @@ name: Verify
 on:
   pull_request:
     branches: [main]
+  # S16.3-001: also fire on push to main so every merge commit produces a
+  # Verify run in the Actions tab (main-branch CI observability). DO NOT add
+  # `paths-ignore` here — mirror the PR trigger's pattern. The `changes` job
+  # below handles doc-only short-circuit at runtime, giving us a single source
+  # of truth for "what counts as doc-only" across both event types. Adding
+  # `paths-ignore` on push would also create asymmetry with the PR trigger
+  # and re-introduce the required-status-checks deadlock risk on any future
+  # push-scoped required check. See sprints/sprint-16.3.md §S16.3-001.
+  push:
+    branches: [main]
   # Note: paths-ignore removed intentionally. These jobs are required status
   # checks on main. If they don't run on doc-only PRs, auto-merge for those
   # PRs (e.g. the readme-status auto-update PR) will block forever. Instead
@@ -21,23 +31,60 @@ jobs:
           fetch-depth: 0
 
       - id: filter
-        name: Check if PR touches non-doc code
+        name: Check if event touches non-doc code
+        # S16.3-001: parameterize the diff range by event type.
+        # - pull_request: base.sha..head.sha (PR's merge base vs tip)
+        # - push (to main): github.event.before..github.sha (previous main tip
+        #   vs merge commit). If `before` is the zero SHA (first push after
+        #   branch creation / trigger activation) OR if the diff otherwise
+        #   fails, we force code=true so the full suite runs — safer to over-
+        #   run than to silently skip Godot on a main merge.
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+          PUSH_HEAD_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          base_sha="${{ github.event.pull_request.base.sha }}"
-          head_sha="${{ github.event.pull_request.head.sha }}"
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            base_sha="$PR_BASE_SHA"
+            head_sha="$PR_HEAD_SHA"
+          elif [ "$EVENT_NAME" = "push" ]; then
+            base_sha="$PUSH_BEFORE_SHA"
+            head_sha="$PUSH_HEAD_SHA"
+            # Fallback: if `before` is the zero SHA (branch-creation push) or
+            # empty, we can't compute a diff — run the full suite.
+            if [ -z "$base_sha" ] || [ "$base_sha" = "0000000000000000000000000000000000000000" ]; then
+              echo "push event with no usable 'before' SHA — forcing code=true"
+              echo "code=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          else
+            # Unknown event (e.g. workflow_dispatch) — run the full suite.
+            echo "event=$EVENT_NAME — forcing code=true"
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           # List changed files. Anything outside docs/**, sprints/**, and
           # markdown counts as "code" and must run the full verify suite.
           code_changed="false"
+          # If `git diff` itself fails (e.g. missing SHA after a force-push),
+          # fall back to code=true rather than crashing the job.
+          if ! diff_output=$(git diff --name-only "$base_sha" "$head_sha" 2>&1); then
+            echo "git diff failed ($diff_output) — forcing code=true"
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           while IFS= read -r f; do
             case "$f" in
               docs/*|sprints/*|*.md) ;;
               "") ;;
               *) code_changed="true" ;;
             esac
-          done < <(git diff --name-only "$base_sha" "$head_sha")
+          done <<< "$diff_output"
           echo "code=$code_changed" >> "$GITHUB_OUTPUT"
-          echo "PR touches code: $code_changed"
+          echo "event=$EVENT_NAME touches code: $code_changed"
 
   godot-tests:
     name: Godot Unit Tests

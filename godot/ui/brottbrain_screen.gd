@@ -319,21 +319,28 @@ func _draw_card(index: int, y: int) -> int:
 	del_btn.pressed.connect(_remove_card.bind(index))
 	add_child(del_btn)
 	
-	# Select for reorder on click.
-	# [S17.3-004] Selected-row overlay: previously α=0.01 (always invisible, no
-	# visual feedback for which row is selected). Now tinted blue @ 30% alpha
-	# when this row is the selected card; non-selected rows keep the near-
-	# invisible click overlay so the button stays click-capturable without
-	# visual noise. Per sprint-17.3.md §"Task specs" → "S17.3-004".
+	# [S17.4-001] Selected-row overlay: ColorRect overlay pair (pixel-visible tint).
+	# Previous implementation used `modulate` on a flat Button — Godot's flat-button
+	# modulate path has no colored fill to tint, so pixels never changed (#205).
+	# Fix (Gizmo Phase 1 spec, verbatim): paint a ColorRect BENEATH a flat click-
+	# capture Button. Overlay `mouse_filter = MOUSE_FILTER_IGNORE` so the Button
+	# above handles clicks. Overlay bounds (600, 55).
+	var select_overlay := ColorRect.new()
+	select_overlay.name = "select_overlay_%d" % index
+	select_overlay.position = Vector2(30, y)
+	select_overlay.size = Vector2(600, 55)
+	select_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if index == selected_card_index:
+		select_overlay.color = Color(0.3, 0.6, 1.0, 0.3)  # selected: blue @ 30% alpha
+	else:
+		select_overlay.color = Color(0, 0, 0, 0)  # unselected: fully transparent
+	add_child(select_overlay)
+	
 	var select_btn := Button.new()
 	select_btn.text = ""
 	select_btn.flat = true
 	select_btn.position = Vector2(30, y)
-	select_btn.size = Vector2(590, 50)
-	if index == selected_card_index:
-		select_btn.modulate = Color(0.3, 0.6, 1.0, 0.3)  # blue, 30% alpha
-	else:
-		select_btn.modulate = Color(1, 1, 1, 0.01)  # near-invisible click overlay
+	select_btn.size = Vector2(600, 55)
 	select_btn.pressed.connect(func(): selected_card_index = index; _build_ui())
 	add_child(select_btn)
 	

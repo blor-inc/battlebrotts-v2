@@ -41,7 +41,15 @@
 - Enable `enforce_admins` to close the admin-bypass footgun.
 - Apply same protection rules to `brott-studio/studio-audits`.
 
-### 5. CODEOWNERS — DEFERRED / DECLINED (documented decision)
+### 5. Simplification passes (P1, approved 2026-04-21)
+
+**5a. Fold Patch into Nutts.** Patch's "on-demand DevOps" role adds maintenance overhead for marginal benefit. Mechanical fixes run through Nutts with an "infra-only" scope tag. Delete `agents/patch.md`; update Nutts profile + framework docs to document the scope-tag convention.
+
+**5b. Investigate Ett fold into Riv.** Invariant that MUST be preserved: **Gizmo stays at head of loop** (design-first principle, load-bearing). Question: in the last 2-3 arcs, has Ett produced planning output Riv couldn't have produced inline? 10-min investigation reading Ett outputs across S15–S17. Bias toward folding. If folded: Riv writes the sub-sprint plan inline; plan-file deliverable retained.
+
+**5c. Remove prompt-level rules enforced structurally.** Once Optic becomes a required check (§1), remove "don't merge until Optic verifies" from Specc/Riv/Boltz prompts. General principle: **if a structural gate enforces X, profiles should not talk about X.** Duplicated rules are drift-surfaces. Audit all 8 profiles; remove redundancies; document the principle as a framework invariant.
+
+### 6. CODEOWNERS — DEFERRED / DECLINED (documented decision)
 - HCD does not want to be in the PR-review critical path. Creative-authority enforcement via HCD approval was considered and declined in favor of structural gates (Optic check, Specc-with-receipts pattern).
 - Sacred-path concept retained as a scope-gate in agent prompts (existing), but not structurally enforced via CODEOWNERS. Revisit only if a concrete sacred-path breach occurs.
 
@@ -63,9 +71,10 @@
 ## Sub-sprint shape (tentative — Gizmo/Ett to refine)
 
 - **F.1** Optic App + structural check (CI workflow + Optic profile update + branch protection update).
-- **F.2** Framework self-sufficiency pass (ESCALATION promotion, FRAMEWORK reconciliation, BOOTSTRAP_NEW_PROJECT.md, CI-gate abstraction).
+- **F.2** Framework self-sufficiency pass (ESCALATION promotion, FRAMEWORK reconciliation on Riv+Ett canon, BOOTSTRAP_NEW_PROJECT.md, CI-gate abstraction).
 - **F.3** Cold-start validation + arc-close protocol update.
 - **F.4** Branch protection tightening (bypass removal, enforce_admins).
+- **F.5** Simplification passes (fold Patch into Nutts; investigate Ett fold with Gizmo-at-head invariant protected; prune prompt-level rules now structurally enforced).
 
 ---
 

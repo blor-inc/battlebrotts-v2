@@ -205,7 +205,12 @@ func test_no_moonwalking() -> void:
 					violations += 1
 					break
 	
-	_assert(violations <= 10, "No moonwalking violations (%d/100)" % violations)
+	_assert(violations <= 15, "No moonwalking violations (%d/100)" % violations)
+	# S17.2-003 revision #2 §3.2: threshold raised from ≤10 to ≤15 because the
+	# velocity-smoothing pass in S17.2-003 adds ≤1 tick of rotational lag on the
+	# pillar-escape path, slightly lengthening the tail of continuous-backward
+	# runs through the pillar quadrant. Baseline pre-smoothing ≈7; S17.2-003
+	# expected 9–13. Headroom to 15 per Gizmo revision #2.
 	# S14.1-B2 re-tune (PR #74): main baseline is 4/100 flaky; with the wall-stuck
 	# nav fix armed near geometry, the 6-8px/tick escape nudge occasionally
 	# registers as >38.4px straight backup when combined with tight Scout orbits

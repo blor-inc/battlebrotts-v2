@@ -45,9 +45,15 @@
 
 **5a. Fold Patch into Nutts.** Patch's "on-demand DevOps" role adds maintenance overhead for marginal benefit. Mechanical fixes run through Nutts with an "infra-only" scope tag. Delete `agents/patch.md`; update Nutts profile + framework docs to document the scope-tag convention.
 
-**5b. Investigate Ett fold into Riv.** Invariant that MUST be preserved: **Gizmo stays at head of loop** (design-first principle, load-bearing). Question: in the last 2-3 arcs, has Ett produced planning output Riv couldn't have produced inline? 10-min investigation reading Ett outputs across S15–S17. Bias toward folding. If folded: Riv writes the sub-sprint plan inline; plan-file deliverable retained.
+**5b. Investigate Ett fold into Riv.** Invariant that MUST be preserved: **Gizmo stays at head of loop** (design-first principle, load-bearing). Canonical ordering is Gizmo (Phase 1, design) → Ett (Phase 2, plan using design) → execution. Ett is NOT ceremonial one-shot planning — it turns design into a prioritized task breakdown integrating infra + audit findings + backlog. **Bias: keep Ett unless investigation finds it's been a rubber stamp for 2-3 arcs.** 10-min investigation reading Ett outputs across S15–S17. If kept, document Ett's load-bearing contribution explicitly so the question doesn't re-open every arc.
 
 **5c. Remove prompt-level rules enforced structurally.** Once Optic becomes a required check (§1), remove "don't merge until Optic verifies" from Specc/Riv/Boltz prompts. General principle: **if a structural gate enforces X, profiles should not talk about X.** Duplicated rules are drift-surfaces. Audit all 8 profiles; remove redundancies; document the principle as a framework invariant.
+
+**5d. Delete `ORCHESTRATION_PATTERNS.md`.** 203 lines documenting four orchestration patterns, of which only one (sequential pipeline) is canon — the other three are marked "potential future." Aspirational docs confuse fresh agents about what's real. Move one paragraph ("we use sequential pipeline, here's why") into PIPELINE.md; delete the rest. Resurrect only if fan-out/hierarchical becomes real.
+
+**5e. Collapse FRAMEWORK.md + PIPELINE.md.** The two docs overlap heavily (both describe pipeline, agents, core principles). Having two sources of truth is the root of the Riv-retired contradiction — not a bug to fix, a symptom to eliminate. Pick PIPELINE.md as canonical (shorter, more accurate). Move anything unique from FRAMEWORK.md in. Reduce FRAMEWORK.md to a README-style index (or delete). One doc to update per change = eliminates an entire class of drift.
+
+**5f. Light agent-profile audit.** Agent profile sizes are uneven (Nutts 37 lines, Riv 134). Strip aspirational prose; keep operational content. Goal: each profile is as long as it needs to be, no longer. Aim is not uniformity — Riv + Optic earn their size through concrete need; others may not.
 
 ### 6. CODEOWNERS — DEFERRED / DECLINED (documented decision)
 - HCD does not want to be in the PR-review critical path. Creative-authority enforcement via HCD approval was considered and declined in favor of structural gates (Optic check, Specc-with-receipts pattern).
@@ -74,7 +80,7 @@
 - **F.2** Framework self-sufficiency pass (ESCALATION promotion, FRAMEWORK reconciliation on Riv+Ett canon, BOOTSTRAP_NEW_PROJECT.md, CI-gate abstraction).
 - **F.3** Cold-start validation + arc-close protocol update.
 - **F.4** Branch protection tightening (bypass removal, enforce_admins).
-- **F.5** Simplification passes (fold Patch into Nutts; investigate Ett fold with Gizmo-at-head invariant protected; prune prompt-level rules now structurally enforced).
+- **F.5** Simplification passes (fold Patch into Nutts; investigate Ett fold with Gizmo-at-head invariant protected and bias toward keep; prune prompt-level rules now structurally enforced; delete ORCHESTRATION_PATTERNS.md; collapse FRAMEWORK.md + PIPELINE.md; audit agent profile sizes).
 
 ---
 

@@ -392,9 +392,10 @@ func _format_trigger_param(trigger: int, param: Variant) -> String:
 	var td: Array = TRIGGER_DISPLAY[trigger]
 	match td[2]:
 		"pct":
-			return "below %d%%" % int(float(param) * 100) if trigger in [0, 2, 4] else "above %d%%" % int(float(param) * 100)
+			var pct_below_triggers := [BrottBrain.Trigger.WHEN_IM_HURT, BrottBrain.Trigger.WHEN_LOW_ENERGY, BrottBrain.Trigger.WHEN_THEYRE_HURT]
+			return "below %d%%" % int(float(param) * 100) if trigger in pct_below_triggers else "above %d%%" % int(float(param) * 100)
 		"tiles":
-			return "within %s tiles" % str(param) if trigger == 5 else "beyond %s tiles" % str(param)
+			return "within %s tiles" % str(param) if trigger == BrottBrain.Trigger.WHEN_THEYRE_CLOSE else "beyond %s tiles" % str(param)
 		"tiles_per_sec":
 			return "at %s tiles/sec" % str(param)
 		"seconds":

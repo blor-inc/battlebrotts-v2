@@ -54,7 +54,6 @@ const SPRINT_TEST_FILES := [
 	"res://tests/test_sprint17_1_first_run_crate.gd",
 	"res://tests/test_sprint17_2_wall_stuck.gd",
 	"res://tests/test_s17_2_scout_feel.gd",
-	"res://tests/test_s17_2_scout_feel.gd",
 	"res://tests/test_s17_3_002_drag_lie.gd",
 	"res://tests/test_s17_3_003_delete_redesign.gd",
 	"res://tests/test_s17_3_004_card_library.gd",

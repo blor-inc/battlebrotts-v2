@@ -113,6 +113,11 @@ func _init(seed_val: int = 0) -> void:
 
 func add_brott(brott: BrottState) -> void:
 	brotts.append(brott)
+	# S17.2-003 phase 3: seed _pos_snapshot with the current position so code
+	# that reads cross-bot `target._pos_snapshot` before the first simulate_tick
+	# call (e.g. tests exercising helpers like _wall_escape_direction directly)
+	# observes a sensible initial world state instead of Vector2.ZERO.
+	brott._pos_snapshot = brott.position
 
 func get_json_log() -> Array:
 	return _json_log

@@ -30,6 +30,7 @@ func _initialize() -> void:
 	_test_reversal_damping_magnitude_dip()
 	_test_determinism_same_seed_byte_identical_logs()
 	_test_retreat_writes_do_not_touch_velocity_state()
+	_test_retreat_step_bounded_per_bot_under_snapshot_tick()
 	print("\n=== Results: %d passed, %d failed, %d total ===" % [pass_count, fail_count, test_count])
 	quit(1 if fail_count > 0 else 0)
 
@@ -196,3 +197,57 @@ func _test_retreat_writes_do_not_touch_velocity_state() -> void:
 	var before: Vector2 = b.velocity
 	b.position += Vector2(-10.0, 0.0)
 	_assert(b.velocity == before, "b.position write does not alter b.velocity")
+
+## AC-T4 — Retreat-step per-bot bound under simultaneous (two-phase) physics.
+## Spawn two Scouts overlapping inside TENSION-too-close range; run 20 ticks.
+## Assert each bot's cumulative backward displacement (intent-frame, dot < -0.7,
+## summed across all retreat ticks regardless of period boundaries) is
+## ≤ TILE_SIZE * 2 + 2 px (one TENSION retreat budget + one RECOVERY retreat
+## budget + small float margin). This is a tuning-invariant guardrail: it
+## catches future regressions in the retreat-bypass lane (e.g., a change to
+## RETREAT_SPEED_MULT or the two-phase tick breaking the per-bot bound) before
+## they propagate into test_sprint11_2.gd as violation spikes. Spec:
+## docs/design/s17.2-003-retreat-calibration.md §2.4.
+func _test_retreat_step_bounded_per_bot_under_snapshot_tick() -> void:
+	print("\n-- AC-T4: Per-bot backward-displacement bound under two-phase tick --")
+	var b0 := _mk(ChassisData.ChassisType.SCOUT, 0, "S0")
+	var b1 := _mk(ChassisData.ChassisType.SCOUT, 1, "S1")
+	var sim := CombatSim.new(42)
+	b0.position = Vector2(200, 256)
+	b1.position = Vector2(220, 256)
+	sim.add_brott(b0)
+	sim.add_brott(b1)
+	
+	var bots := [b0, b1]
+	var prev_pos := [b0.position, b1.position]
+	var backward_sum := [0.0, 0.0]
+	
+	for _t in range(20):
+		if sim.match_over:
+			break
+		# Pre-tick intent-frame sampling per bot.
+		var to_target_pre := [Vector2.ZERO, Vector2.ZERO]
+		for i in range(2):
+			var b: BrottState = bots[i]
+			if b.alive and b.target != null:
+				to_target_pre[i] = b.target.position - b.position
+		sim.simulate_tick()
+		for i in range(2):
+			var b: BrottState = bots[i]
+			if not b.alive:
+				continue
+			var movement: Vector2 = b.position - prev_pos[i]
+			var tt_pre: Vector2 = to_target_pre[i]
+			if tt_pre.length() > 0.1 and movement.length() > 0.1:
+				var dot: float = movement.normalized().dot(tt_pre.normalized())
+				if dot < -0.7:
+					# Magnitude of the backward (anti-to_target) projection.
+					var back_mag: float = absf(movement.dot(tt_pre.normalized()))
+					backward_sum[i] += back_mag
+			prev_pos[i] = b.position
+	
+	var bound: float = CombatSim.TILE_SIZE * 2.0 + 2.0
+	_assert(backward_sum[0] <= bound,
+		"Bot 0 backward displacement %.2f <= %.2f (2 tiles + 2px)" % [backward_sum[0], bound])
+	_assert(backward_sum[1] <= bound,
+		"Bot 1 backward displacement %.2f <= %.2f (2 tiles + 2px)" % [backward_sum[1], bound])

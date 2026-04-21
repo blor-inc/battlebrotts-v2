@@ -55,7 +55,17 @@
 
 **5f. Light agent-profile audit.** Agent profile sizes are uneven (Nutts 37 lines, Riv 134). Strip aspirational prose; keep operational content. Goal: each profile is as long as it needs to be, no longer. Aim is not uniformity — Riv + Optic earn their size through concrete need; others may not.
 
-**5f-addendum (from S17.2 planning, 2026-04-21): Ett escalation-threshold tuning.** Ett surfaced 3 decisions to HCD during S17.2 planning (D3/D4/D5). Only D3 (time ask) was a legitimate escalation. D4 (technical scope with no felt gameplay impact) and D5 (dev-only tooling) are exactly the class of decision the pipeline should absorb per USER.md "HCD = creative-only" rule. Root cause hypothesis: Ett's profile defaults to escalate-when-uncertain, and Gizmo spec open-questions sections compound this (Gizmo passes 6 questions to Ett, Ett passes 3 up to HCD rather than deciding). Fix during audit: sharpen Ett's escalation threshold + ask Gizmo to make open-questions sections decide-or-defer, not escalate-by-default.
+**5f-addendum (from S17.2 planning, 2026-04-21): Ett escalation-threshold tuning.** Ett surfaced 3 decisions to HCD during S17.2 planning (D3/D4/D5). HCD post-mortem:
+- D3 (mid-sprint feel-check playtest): legitimate HCD domain, but surfaced too early. Should be surfaced when the playtest build is actually ready, not at planning time. Likely batched with D4/D5 for token efficiency.
+- D4 (Brawler/Fortress scope): grey zone. Escalating is acceptable; Ett's judgment was sound. Not a miss but not required.
+- D5 (dev-only velocity overlay): clear miss. Pure technical / quality improvement. Should've been decided by Ett.
+
+Refined rules to bake into Ett's profile during audit:
+1. **Creative-vs-technical line:** if confident it's technical, decide. Only escalate grey zones and clear-creative.
+2. **Decide-vs-defer line:** time-based asks (like "play for 5 min") should wait until the trigger event (build ready) to reduce HCD cognitive load.
+3. **Don't batch:** surfacing 3 decisions at once conflates urgency levels. Separate by urgency + trigger-time even if it means more pings.
+
+Gizmo-side addendum: open-questions sections in Gizmo specs currently default to "escalate to Ett," which compounds Ett's tendency to escalate up. Audit Gizmo templates to prefer "decide-or-defer" rather than "pass up."
 
 ### 6. CODEOWNERS — DEFERRED / DECLINED (documented decision)
 - HCD does not want to be in the PR-review critical path. Creative-authority enforcement via HCD approval was considered and declined in favor of structural gates (Optic check, Specc-with-receipts pattern).

@@ -492,10 +492,10 @@ func _move_brott(b: BrottState) -> void:
 				var desired_vel_p: Vector2 = to_pillar_v.normalized() * b.current_speed
 				b.position += _smooth_velocity(b, desired_vel_p, TICK_DELTA)
 	else:
-		var to_target: Vector2 = b.target.position - b.position
+		var to_target: Vector2 = b.target._pos_snapshot - b.position
 		var dist: float = to_target.length()
 		var max_weapon_range: float = _get_max_weapon_range_px(b)
-		var has_los: bool = _has_los(b.position, b.target.position)
+		var has_los: bool = _has_los(b.position, b.target._pos_snapshot)
 		
 		# Determine if bot is actively moving this tick
 		var wants_to_move: bool = true
@@ -573,7 +573,7 @@ func _move_brott(b: BrottState) -> void:
 	
 	# Update visual facing angle (turn speed is visual-only)
 	if b.target != null:
-		var desired_angle: float = rad_to_deg((b.target.position - b.position).angle())
+		var desired_angle: float = rad_to_deg((b.target._pos_snapshot - b.position).angle())
 		var angle_diff: float = fmod(desired_angle - b.facing_angle + 540.0, 360.0) - 180.0
 		var max_turn: float = b.turn_speed * TICK_DELTA
 		if absf(angle_diff) <= max_turn:
@@ -756,7 +756,7 @@ func _wall_escape_direction(b: BrottState) -> Vector2:
 	if e.length() >= ESCAPE_MAGNITUDE_MIN:
 		return e.normalized()
 	if b.target != null and b.target.alive:
-		var tt: Vector2 = b.target.position - b.position
+		var tt: Vector2 = b.target._pos_snapshot - b.position
 		if tt.length() > 0.01:
 			return tt.normalized()
 	return Vector2.ZERO
@@ -776,7 +776,7 @@ func _apply_unstick_nudge(b: BrottState, push: Vector2) -> void:
 	# untouched — the unstick maneuver's job is to escape geometry, not to
 	# out-retreat the moonwalk invariant. See docs/kb/juke-bypass-movement-caps.md.
 	if b.target != null:
-		var to_target_u: Vector2 = b.target.position - b.position
+		var to_target_u: Vector2 = b.target._pos_snapshot - b.position
 		if to_target_u.length_squared() > 0.0001:
 			var to_target_n: Vector2 = to_target_u.normalized()
 			var along: float = push.dot(to_target_n)
@@ -863,7 +863,7 @@ func _smooth_velocity(b: BrottState, desired: Vector2, dt: float) -> Vector2:
 	return b.velocity * dt
 
 func _do_combat_movement(b: BrottState, base_spd: float) -> void:
-	var to_target: Vector2 = b.target.position - b.position
+	var to_target: Vector2 = b.target._pos_snapshot - b.position
 	var dist: float = to_target.length()
 	var engage: Dictionary = _get_engagement_distance(b)
 	var ideal: float = engage["ideal"]

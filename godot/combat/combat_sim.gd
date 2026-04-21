@@ -178,6 +178,20 @@ func simulate_tick() -> void:
 			continue
 		_tick_modules(b)
 	
+	# S17.2-003 (phase 3): pre-movement position snapshot. Cross-bot reads in
+	# _move_brott (target.position, unstick-nudge target, etc.) use this snapshot
+	# instead of the live `.position` so every bot in this tick sees the same
+	# pre-move world state. Without this, the fixed iteration order leaks into
+	# gameplay: team 0 always moves first, team 1 then reacts to team 0's
+	# already-updated position, which cascades into an ~80% team-0 WR in
+	# Scout-vs-Scout mirror matches (diag_mirror_n200 @ N=200). Separation
+	# continues to read LIVE positions (see _move_brott) — snapshotting there
+	# breaks overlap resolution because both bots then push against the stale
+	# same-distance pair and never actually separate.
+	for b in brotts:
+		if b.alive:
+			b._pos_snapshot = b.position
+	
 	for b in brotts:
 		if not b.alive:
 			continue

@@ -181,5 +181,5 @@ Arc fuse: 5 sub-sprints; re-evaluate with HCD if any sub-sprint grows or additio
 
 - [x] All AC-1 through AC-6 satisfied and evidenced. *(AC-1 narrow — pipeline actors blocked; admin-PAT bypass → S18.4. See Close-out residuals.)*
 - [x] `sprint-18.1.md` status updated from `Planning` to `Complete` at close-out; exit-criteria checkboxes ticked; carry-forwards (if any) listed.
-- [x] Specc audit for S18.1 lands on `studio-audits/main` before S18.2 planning PR opens (audit-gate discipline).
+- [ ] Specc audit for S18.1 lands on `studio-audits/main` before S18.2 planning PR opens (audit-gate discipline). _(Open — audit scheduled post-close-out; S18.2 Gizmo/Ett spawn gated on this per Phase 0 audit-gate.)_
 - [x] No regressions in existing required checks on `battlebrotts-v2:main`.

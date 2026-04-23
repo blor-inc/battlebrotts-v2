@@ -154,14 +154,18 @@ func _t11_build_opponent_brott_uses_picker() -> void:
 	assert_true(all_ok, "T11 build_opponent_brott_uses_picker — brott fields match a template")
 
 func _t12_build_opponent_brott_variety() -> void:
-	# scrapyard[2] tier 2. Pool at tier 2 has 3 templates across ≥2 archetypes.
-	# 5 consecutive builds with the same GameState: never back-to-back same archetype.
+	# S21.1 remediation (Gizmo §6.2b / Optic D4): scrapyard now filters Silver+
+	# templates via `unlock_league`, leaving only `tank_tincan` (TANK) in the
+	# effective scrapyard pool. Variety is therefore not achievable under
+	# scrapyard anymore — the variety invariant now lives on bronze+ pools,
+	# which have ≥3 distinct archetypes at tier 2. Re-target this test to
+	# bronze[2] (tier 2) to preserve the "no back-to-back archetype" intent.
 	var gs := GameState.new()
 	var last_arch: int = -1
 	var no_repeat := true
 	var any_brott := true
 	for i in 5:
-		var b: BrottState = OpponentData.build_opponent_brott("scrapyard", 2, gs)
+		var b: BrottState = OpponentData.build_opponent_brott("bronze", 2, gs)
 		if b == null:
 			any_brott = false
 			break

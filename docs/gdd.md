@@ -367,7 +367,7 @@ chassis, weapons, armor, modules, and stance.
 | `skirmish_scrapper` | Scrapper | SKIRMISHER | 2 | Bronze | Scout + Shotgun + Reactive + Overclock |
 | `bruiser_clanker` | Clanker | BRUISER | 2 | Bronze | Brawler + Arc Emitter + Minigun + Plating + Overclock |
 | `control_static` | Static | CONTROLLER | 3 | Bronze | Brawler + Arc Emitter + Shotgun + Reactive + Repair Nanites |
-| `control_prowler` | Prowler | CONTROLLER | 3 | Bronze | Scout + Arc Emitter + Reactive + Repair Nanites |
+| `control_prowler` | Prowler | CONTROLLER | 3 | Bronze | Scout + Arc Emitter + Reactive + Overclock |
 
 **Difficulty tier mapping** (`OpponentLoadouts.difficulty_for(league, index)`):
 

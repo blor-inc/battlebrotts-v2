@@ -231,7 +231,7 @@ const TEMPLATES: Array[Dictionary] = [
 		"chassis": ChassisData.ChassisType.SCOUT,
 		"weapons": [WeaponData.WeaponType.ARC_EMITTER],
 		"armor": ArmorData.ArmorType.REACTIVE_MESH,
-		"modules": [ModuleData.ModuleType.REPAIR_NANITES],
+		"modules": [ModuleData.ModuleType.OVERCLOCK],
 		"stance": 3,
 		"unlock_league": "bronze",
 		"behavior_cards": [

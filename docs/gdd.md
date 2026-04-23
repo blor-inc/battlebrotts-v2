@@ -365,9 +365,9 @@ chassis, weapons, armor, modules, and stance.
 | `tank_rustwall` | Rustwall | TANK | 2 | Bronze | Brawler + Shotgun + Minigun + Reactive + Repair Nanites |
 | `glass_zap` | Zap | GLASS_CANNON | 2 | Bronze | Scout + Arc Emitter + Reactive + Overclock |
 | `skirmish_scrapper` | Scrapper | SKIRMISHER | 2 | Bronze | Scout + Shotgun + Reactive + Overclock |
-| `bruiser_clanker` | Clanker | BRUISER | 2 | Bronze | Brawler + Arc Emitter + Minigun + Plating + Overclock |
+| `bruiser_clanker` | Clanker | BRUISER | 2 | Bronze | Brawler + Arc Emitter + Shotgun + Plating + Overclock |
 | `control_static` | Static | CONTROLLER | 3 | Bronze | Brawler + Arc Emitter + Shotgun + Reactive + Repair Nanites |
-| `control_prowler` | Prowler | CONTROLLER | 3 | Bronze | Scout + Arc Emitter + Reactive + Overclock |
+| `control_prowler` | Prowler | CONTROLLER | 3 | Bronze | Scout + Arc Emitter + Reactive + Repair Nanites |
 
 **Difficulty tier mapping** (`OpponentLoadouts.difficulty_for(league, index)`):
 

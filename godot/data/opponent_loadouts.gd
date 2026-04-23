@@ -185,15 +185,15 @@ const TEMPLATES: Array[Dictionary] = [
 		"archetype": Archetype.BRUISER,
 		"tier": 2,
 		"chassis": ChassisData.ChassisType.BRAWLER,
-		"weapons": [WeaponData.WeaponType.ARC_EMITTER, WeaponData.WeaponType.MINIGUN],
+		"weapons": [WeaponData.WeaponType.ARC_EMITTER, WeaponData.WeaponType.SHOTGUN],
 		"armor": ArmorData.ArmorType.PLATING,
 		"modules": [ModuleData.ModuleType.OVERCLOCK],
 		"stance": 0,
 		"unlock_league": "bronze",
 		"behavior_cards": [
 			{
-				"trigger": {"kind": "enemy_within_tiles", "value": 4},
-				"action": {"kind": "use_gadget", "value": ModuleData.ModuleType.OVERCLOCK},
+				"trigger": {"kind": "enemy_within_tiles", "value": 2},
+				"action": {"kind": "weapons_all_fire"},
 			},
 			{
 				"trigger": {"kind": "enemy_hp_below_pct", "value": 40},
@@ -231,7 +231,7 @@ const TEMPLATES: Array[Dictionary] = [
 		"chassis": ChassisData.ChassisType.SCOUT,
 		"weapons": [WeaponData.WeaponType.ARC_EMITTER],
 		"armor": ArmorData.ArmorType.REACTIVE_MESH,
-		"modules": [ModuleData.ModuleType.OVERCLOCK],
+		"modules": [ModuleData.ModuleType.REPAIR_NANITES],
 		"stance": 3,
 		"unlock_league": "bronze",
 		"behavior_cards": [

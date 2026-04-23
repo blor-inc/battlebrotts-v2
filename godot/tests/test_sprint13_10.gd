@@ -38,12 +38,12 @@ func _test_template_count_within_cap() -> void:
 ## last_archetype != -1 and doesn't empty pool). With tier=99, pool=tier-(99-1)=tier-98=[].
 ## So pool stays empty through all branches → picker must return {}.
 func _test_picker_empty_pool_returns_empty_dict() -> void:
-	var pick: Dictionary = OpponentLoadouts.pick_opponent_loadout(99, -1)
+	var pick: Dictionary = OpponentLoadouts.pick_opponent_loadout(99, "", -1)
 	assert_true(pick.is_empty(), "T2 picker returns {} for tier=99 (no matches, no tier-98 fallback)")
 
 ## T3 — Same with a hint/variety arg; still {} rather than crash.
 func _test_picker_empty_pool_preserves_signature() -> void:
-	var pick: Dictionary = OpponentLoadouts.pick_opponent_loadout(99, OpponentLoadouts.Archetype.TANK)
+	var pick: Dictionary = OpponentLoadouts.pick_opponent_loadout(99, "", OpponentLoadouts.Archetype.TANK)
 	assert_true(pick.is_empty(), "T3 picker returns {} even with last_archetype hint")
 
 ## T4 — Builder with no game_state still survives empty-pool via tier-1 fallback chain.

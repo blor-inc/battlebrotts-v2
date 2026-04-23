@@ -64,7 +64,7 @@ func _t2_templates_use_valid_enums() -> void:
 			if not WeaponData.WEAPONS.has(w): ok = false
 		for m in t["modules"]:
 			if not ModuleData.MODULES.has(m): ok = false
-		if t["stance"] < 0 or t["stance"] > 2: ok = false
+		if t["stance"] < 0 or t["stance"] > 3: ok = false
 	assert_true(ok, "T2 templates_use_valid_enums")
 
 func _t3_templates_respect_slot_limits() -> void:
@@ -99,7 +99,7 @@ func _t8_picker_variety_10_picks() -> void:
 	var last := -1
 	var no_repeat := true
 	for i in 10:
-		var pick := OpponentLoadouts.pick_opponent_loadout(2, last)
+		var pick := OpponentLoadouts.pick_opponent_loadout(2, "", last)
 		if last != -1 and pick["archetype"] == last:
 			no_repeat = false
 		last = pick["archetype"]
@@ -112,7 +112,7 @@ func _t9_picker_variety_fallback_when_pool_size_1() -> void:
 	# should not crash and should return a valid template (either the controller itself via
 	# "keep pool when strip empties" OR a tier-2 fallback).
 	for i in 20:
-		var pick := OpponentLoadouts.pick_opponent_loadout(3, OpponentLoadouts.Archetype.CONTROLLER)
+		var pick := OpponentLoadouts.pick_opponent_loadout(3, "", OpponentLoadouts.Archetype.CONTROLLER)
 		if not _is_valid_template(pick):
 			assert_true(false, "T9 picker returned invalid template on iter %d" % i)
 			return
@@ -180,5 +180,5 @@ func _t13_build_opponent_brott_null_game_state() -> void:
 
 func _t14_picker_accepts_player_archetype_hint() -> void:
 	# Signature stability: third param (player_archetype_hint) accepted without error.
-	var pick: Dictionary = OpponentLoadouts.pick_opponent_loadout(2, -1, OpponentLoadouts.Archetype.TANK)
+	var pick: Dictionary = OpponentLoadouts.pick_opponent_loadout(2, "", -1, OpponentLoadouts.Archetype.TANK)
 	assert_true(_is_valid_template(pick), "T14 picker_accepts_player_archetype_hint — valid template with hint param")

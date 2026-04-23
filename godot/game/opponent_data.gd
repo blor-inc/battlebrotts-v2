@@ -56,13 +56,18 @@ static func build_opponent_brott(league: String, index: int, game_state: GameSta
 	var last_arch: int = -1
 	if game_state != null:
 		last_arch = game_state._last_opponent_archetype
-	var template: Dictionary = OpponentLoadouts.pick_opponent_loadout(tier, last_arch)
+	# S21.1: league filter active at bronze+ only; scrapyard continues to pull
+	# from the full tier pool (incl. grandfathered tier-2 templates that carry
+	# Silver+ gear) to preserve the pre-S21.1 scrapyard behavior documented in
+	# test_sprint13_9.gd (T12b build_opponent_brott_variety at index 2).
+	var filter_league: String = league if league != "scrapyard" else ""
+	var template: Dictionary = OpponentLoadouts.pick_opponent_loadout(tier, filter_league, last_arch)
 	if template.is_empty():
 		push_warning("OpponentLoadouts: empty pool for tier=%d league=%s index=%d; retrying without variety" % [tier, league, index])
-		template = OpponentLoadouts.pick_opponent_loadout(tier, -1)
+		template = OpponentLoadouts.pick_opponent_loadout(tier, filter_league, -1)
 	if template.is_empty():
 		push_warning("OpponentLoadouts: still empty after variety skip for tier=%d; falling back to tier 1" % tier)
-		template = OpponentLoadouts.pick_opponent_loadout(1, -1)
+		template = OpponentLoadouts.pick_opponent_loadout(1, filter_league, -1)
 	if template.is_empty():
 		return null
 

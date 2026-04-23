@@ -56,13 +56,20 @@ static func build_opponent_brott(league: String, index: int, game_state: GameSta
 	var last_arch: int = -1
 	if game_state != null:
 		last_arch = game_state._last_opponent_archetype
-	var template: Dictionary = OpponentLoadouts.pick_opponent_loadout(tier, last_arch)
+	# S21.1 remediation (Gizmo §6.2b / Optic D4): league filter now applies to
+	# scrapyard as well as bronze+. This correctly excludes Silver+ templates
+	# (tank_ironclad, glass_sniper) from scrapyard pools, aligning runtime
+	# behavior with the `unlock_league` schema. Scrapyard's effective pool is
+	# now tank_tincan only; the build chain falls back to tier-1 via the
+	# existing empty-pool guard when scrapyard tier-2 resolves empty.
+	var filter_league: String = league
+	var template: Dictionary = OpponentLoadouts.pick_opponent_loadout(tier, filter_league, last_arch)
 	if template.is_empty():
 		push_warning("OpponentLoadouts: empty pool for tier=%d league=%s index=%d; retrying without variety" % [tier, league, index])
-		template = OpponentLoadouts.pick_opponent_loadout(tier, -1)
+		template = OpponentLoadouts.pick_opponent_loadout(tier, filter_league, -1)
 	if template.is_empty():
 		push_warning("OpponentLoadouts: still empty after variety skip for tier=%d; falling back to tier 1" % tier)
-		template = OpponentLoadouts.pick_opponent_loadout(1, -1)
+		template = OpponentLoadouts.pick_opponent_loadout(1, filter_league, -1)
 	if template.is_empty():
 		return null
 

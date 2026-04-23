@@ -352,21 +352,27 @@ chassis, weapons, armor, modules, and stance.
 - **BRUISER** — Medium armor, dual weapons, aggressive stance. Midrange pressure; rewards TCR-window commitment.
 - **CONTROLLER** — Disruption (jammer / EMP / arc emitter), defensive stance. Punishes module-reliant player builds.
 
-**Starter templates** (6):
+**Template pool** (12 total; 7 Bronze-legal, 5 Silver+):
 
-| ID | Name | Archetype | Tier | Composition |
-|---|---|---|---|---|
-| `tank_ironclad` | Ironclad | TANK | 2 | Fortress + Shotgun/Flak + Ablative + Repair Nanites |
-| `glass_sniper` | Pinprick | GLASS_CANNON | 2 | Scout + Railgun/Plasma + None + Overclock/Sensor/Afterburner |
-| `skirmish_wasp` | Wasp | SKIRMISHER | 1 | Scout + Flak/Plasma + Plating + Afterburner/Sensor/Overclock |
-| `bruiser_crusher` | Crusher-II | BRUISER | 2 | Brawler + Shotgun/Minigun + Reactive + Overclock/Repair |
-| `controller_jammer` | Jammer | CONTROLLER | 3 | Brawler + Arc/Missile + Reactive + EMP/Shield Projector |
-| `tank_tincan` | Tincan | TANK | 1 | Scout + Plasma + Plating |
+| ID | Name | Archetype | Tier | Unlock | Composition |
+|---|---|---|---|---|---|
+| `tank_tincan` | Tincan | TANK | 1 | Scrapyard | Scout + Plasma + Plating |
+| `skirmish_wasp` | Wasp | SKIRMISHER | 1 | Silver | Scout + Flak/Plasma + Plating + Afterburner/Sensor/Overclock |
+| `tank_ironclad` | Ironclad | TANK | 2 | Silver | Fortress + Shotgun/Flak + Ablative + Repair Nanites |
+| `glass_sniper` | Pinprick | GLASS_CANNON | 2 | Silver | Scout + Railgun/Plasma + None + Overclock/Sensor/Afterburner |
+| `bruiser_crusher` | Crusher-II | BRUISER | 2 | Bronze | Brawler + Shotgun/Minigun + Reactive + Overclock/Repair |
+| `controller_jammer` | Jammer | CONTROLLER | 3 | Gold | Brawler + Arc/Missile + Reactive + EMP/Shield Projector |
+| `tank_rustwall` | Rustwall | TANK | 2 | Bronze | Brawler + Shotgun + Minigun + Reactive + Repair Nanites |
+| `glass_zap` | Zap | GLASS_CANNON | 2 | Bronze | Scout + Arc Emitter + Reactive + Overclock |
+| `skirmish_scrapper` | Scrapper | SKIRMISHER | 2 | Bronze | Scout + Shotgun + Reactive + Overclock |
+| `bruiser_clanker` | Clanker | BRUISER | 2 | Bronze | Brawler + Arc Emitter + Shotgun + Plating + Overclock |
+| `control_static` | Static | CONTROLLER | 3 | Bronze | Brawler + Arc Emitter + Shotgun + Reactive + Repair Nanites |
+| `control_prowler` | Prowler | CONTROLLER | 3 | Bronze | Scout + Arc Emitter + Reactive + Repair Nanites |
 
 **Difficulty tier mapping** (`OpponentLoadouts.difficulty_for(league, index)`):
 
 - **Scrapyard** indices 0, 1, 2 → tiers **1, 1, 2**
-- **Bronze** indices 0, 1, 2 → tiers **2, 2, 3** (hooks only; league unpopulated)
+- **Bronze** indices 0, 1, 2, 3, 4 → tiers **2, 2, 2, 3, 3** (populated at S21.1 — 5-opponent curve, tier-2 openers → tier-3 closers)
 
 Picker fallback: when a tier's pool has fewer than 2 entries, tier-1-lower
 templates are added. The variety strip (`last_archetype != pick.archetype`)
@@ -384,6 +390,14 @@ naturally cleared by `GameFlow.new_game()` (fresh GameState per run).
 - Counter-play hook reserved for **Sprint 13.10**: picker signature
   accepts `_player_archetype_hint` (currently unused) so tier/variety
   logic can later be composed with matchup-aware filtering.
+- **League-gating (S21.1):** templates carry an `unlock_league` field
+  (`scrapyard` | `bronze` | `silver` | `gold` | `platinum`). The picker
+  accepts a `current_league` arg and filters out templates whose unlock
+  exceeds the current league's rank, so Bronze players never face Silver+
+  gear. Empty-string (backward-compat default) skips the filter, which
+  is how the Scrapyard path continues to draw from the grandfathered
+  tier-2 pool. Opponent templates also carry a `behavior_cards` field
+  (data-only at S21.1; engine wiring tracked as carry-forward).
 
 ---
 

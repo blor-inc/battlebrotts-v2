@@ -1,11 +1,38 @@
-## Sprint 13.9 — Opponent loadout templates + variety-preserving picker.
-## See docs/design/sprint13.9-fortress-loadout-pass.md §3, §4.
+## Opponent loadout templates + variety-preserving picker.
+##
+## S13.9 — initial 6 templates + picker + tier hooks (Scrapyard populated; Bronze hooks only).
+## S21.1 — Bronze league populated (5-opponent curve, tier-2 openers → tier-3 closers)
+##          • 6 new Bronze-legal templates (4 tier-2 + 2 tier-3); existing `bruiser_crusher`
+##            remains Bronze-legal → active Bronze pool = 7 templates.
+##          • Tier mapping `difficulty_for("bronze", i)` = [2,2,2,3,3].
+##          • Schema adds `unlock_league` (scrapyard | bronze | silver | gold | platinum)
+##            + `behavior_cards` (data-only; engine wiring tracked as carry-forward).
+##          • Picker takes optional `current_league`; when non-empty, filters out
+##            templates whose `unlock_league` exceeds the league rank, so Bronze
+##            players never face Silver+ gear.
+##
+## Spec refs: docs/design/sprint13.9-fortress-loadout-pass.md §3, §4;
+##            memory/2026-04-23-s21.1-gizmo-bronze-loadout-spec.md §1–§5;
+##            memory/2026-04-23-s21.1-ett-sprint-plan.md §1.1–§1.3.
 class_name OpponentLoadouts
 extends RefCounted
 
 enum Archetype { TANK, GLASS_CANNON, SKIRMISHER, BRUISER, CONTROLLER }
 
-# Template schema (§3.1): id, name, archetype, tier, chassis, weapons, armor, modules, stance.
+## League rank for unlock_league gating (S21.1). Higher rank = later league.
+## Unknown league strings passed via current_league → skip the league filter
+## (treated as "no cap") by the picker for backward compatibility.
+const LEAGUE_RANK: Dictionary = {
+	"scrapyard": 0,
+	"bronze": 1,
+	"silver": 2,
+	"gold": 3,
+	"platinum": 4,
+}
+
+# Template schema (§3.1 + S21.1 additions):
+#   id, name, archetype, tier, chassis, weapons, armor, modules, stance,
+#   unlock_league (S21.1), behavior_cards (S21.1; data-only, engine-ignored).
 const TEMPLATES: Array[Dictionary] = [
 	{
 		"id": "tank_ironclad",
@@ -17,6 +44,8 @@ const TEMPLATES: Array[Dictionary] = [
 		"armor": ArmorData.ArmorType.ABLATIVE_SHELL,
 		"modules": [ModuleData.ModuleType.REPAIR_NANITES],
 		"stance": 1,
+		"unlock_league": "silver",
+		"behavior_cards": [],
 	},
 	{
 		"id": "glass_sniper",
@@ -28,6 +57,8 @@ const TEMPLATES: Array[Dictionary] = [
 		"armor": ArmorData.ArmorType.NONE,
 		"modules": [ModuleData.ModuleType.OVERCLOCK, ModuleData.ModuleType.SENSOR_ARRAY, ModuleData.ModuleType.AFTERBURNER],
 		"stance": 2,
+		"unlock_league": "silver",
+		"behavior_cards": [],
 	},
 	{
 		"id": "skirmish_wasp",
@@ -39,6 +70,8 @@ const TEMPLATES: Array[Dictionary] = [
 		"armor": ArmorData.ArmorType.PLATING,
 		"modules": [ModuleData.ModuleType.AFTERBURNER, ModuleData.ModuleType.SENSOR_ARRAY, ModuleData.ModuleType.OVERCLOCK],
 		"stance": 2,
+		"unlock_league": "silver",
+		"behavior_cards": [],
 	},
 	{
 		"id": "bruiser_crusher",
@@ -50,6 +83,8 @@ const TEMPLATES: Array[Dictionary] = [
 		"armor": ArmorData.ArmorType.REACTIVE_MESH,
 		"modules": [ModuleData.ModuleType.OVERCLOCK, ModuleData.ModuleType.REPAIR_NANITES],
 		"stance": 0,
+		"unlock_league": "bronze",
+		"behavior_cards": [],
 	},
 	{
 		"id": "controller_jammer",
@@ -61,6 +96,8 @@ const TEMPLATES: Array[Dictionary] = [
 		"armor": ArmorData.ArmorType.REACTIVE_MESH,
 		"modules": [ModuleData.ModuleType.EMP_CHARGE, ModuleData.ModuleType.SHIELD_PROJECTOR],
 		"stance": 1,
+		"unlock_league": "gold",
+		"behavior_cards": [],
 	},
 	{
 		"id": "tank_tincan",
@@ -72,30 +109,190 @@ const TEMPLATES: Array[Dictionary] = [
 		"armor": ArmorData.ArmorType.PLATING,
 		"modules": [],
 		"stance": 1,
+		"unlock_league": "scrapyard",
+		"behavior_cards": [],
+	},
+	# ── S21.1 Bronze content drop (Gizmo spec §4) ───────────────────────────────
+	{
+		"id": "tank_rustwall",
+		"name": "Rustwall",
+		"archetype": Archetype.TANK,
+		"tier": 2,
+		"chassis": ChassisData.ChassisType.BRAWLER,
+		"weapons": [WeaponData.WeaponType.SHOTGUN, WeaponData.WeaponType.MINIGUN],
+		"armor": ArmorData.ArmorType.REACTIVE_MESH,
+		"modules": [ModuleData.ModuleType.REPAIR_NANITES],
+		"stance": 0,
+		"unlock_league": "bronze",
+		"behavior_cards": [
+			{
+				"trigger": {"kind": "enemy_within_tiles", "value": 3},
+				"action": {"kind": "weapons_all_fire"},
+			},
+			{
+				"trigger": {"kind": "self_hp_below_pct", "value": 30},
+				"action": {"kind": "switch_stance", "value": 1},
+			},
+		],
+	},
+	{
+		"id": "glass_zap",
+		"name": "Zap",
+		"archetype": Archetype.GLASS_CANNON,
+		"tier": 2,
+		"chassis": ChassisData.ChassisType.SCOUT,
+		"weapons": [WeaponData.WeaponType.ARC_EMITTER],
+		"armor": ArmorData.ArmorType.REACTIVE_MESH,
+		"modules": [ModuleData.ModuleType.OVERCLOCK],
+		"stance": 2,
+		"unlock_league": "bronze",
+		"behavior_cards": [
+			{
+				"trigger": {"kind": "enemy_beyond_tiles", "value": 5},
+				"action": {"kind": "switch_stance", "value": 0},
+			},
+			{
+				"trigger": {"kind": "self_energy_above_pct", "value": 70},
+				"action": {"kind": "use_gadget", "value": ModuleData.ModuleType.OVERCLOCK},
+			},
+		],
+	},
+	{
+		"id": "skirmish_scrapper",
+		"name": "Scrapper",
+		"archetype": Archetype.SKIRMISHER,
+		"tier": 2,
+		"chassis": ChassisData.ChassisType.SCOUT,
+		"weapons": [WeaponData.WeaponType.SHOTGUN],
+		"armor": ArmorData.ArmorType.REACTIVE_MESH,
+		"modules": [ModuleData.ModuleType.OVERCLOCK],
+		"stance": 2,
+		"unlock_league": "bronze",
+		"behavior_cards": [
+			{
+				"trigger": {"kind": "enemy_within_tiles", "value": 3},
+				"action": {"kind": "weapons_all_fire"},
+			},
+			{
+				"trigger": {"kind": "enemy_beyond_tiles", "value": 5},
+				"action": {"kind": "switch_stance", "value": 0},
+			},
+		],
+	},
+	{
+		"id": "bruiser_clanker",
+		"name": "Clanker",
+		"archetype": Archetype.BRUISER,
+		"tier": 2,
+		"chassis": ChassisData.ChassisType.BRAWLER,
+		"weapons": [WeaponData.WeaponType.ARC_EMITTER, WeaponData.WeaponType.SHOTGUN],
+		"armor": ArmorData.ArmorType.PLATING,
+		"modules": [ModuleData.ModuleType.OVERCLOCK],
+		"stance": 0,
+		"unlock_league": "bronze",
+		"behavior_cards": [
+			{
+				"trigger": {"kind": "enemy_within_tiles", "value": 2},
+				"action": {"kind": "weapons_all_fire"},
+			},
+			{
+				"trigger": {"kind": "enemy_hp_below_pct", "value": 40},
+				"action": {"kind": "pick_target", "value": "weakest"},
+			},
+		],
+	},
+	{
+		"id": "control_static",
+		"name": "Static",
+		"archetype": Archetype.CONTROLLER,
+		"tier": 3,
+		"chassis": ChassisData.ChassisType.BRAWLER,
+		"weapons": [WeaponData.WeaponType.ARC_EMITTER, WeaponData.WeaponType.SHOTGUN],
+		"armor": ArmorData.ArmorType.REACTIVE_MESH,
+		"modules": [ModuleData.ModuleType.REPAIR_NANITES],
+		"stance": 1,
+		"unlock_league": "bronze",
+		"behavior_cards": [
+			{
+				"trigger": {"kind": "enemy_within_tiles", "value": 3},
+				"action": {"kind": "weapons_all_fire"},
+			},
+			{
+				"trigger": {"kind": "self_hp_below_pct", "value": 50},
+				"action": {"kind": "switch_stance", "value": 3},
+			},
+		],
+	},
+	{
+		"id": "control_prowler",
+		"name": "Prowler",
+		"archetype": Archetype.CONTROLLER,
+		"tier": 3,
+		"chassis": ChassisData.ChassisType.SCOUT,
+		"weapons": [WeaponData.WeaponType.ARC_EMITTER],
+		"armor": ArmorData.ArmorType.REACTIVE_MESH,
+		"modules": [ModuleData.ModuleType.REPAIR_NANITES],
+		"stance": 3,
+		"unlock_league": "bronze",
+		"behavior_cards": [
+			{
+				"trigger": {"kind": "enemy_within_tiles", "value": 2},
+				"action": {"kind": "switch_stance", "value": 2},
+			},
+			{
+				"trigger": {"kind": "self_hp_below_pct", "value": 40},
+				"action": {"kind": "switch_stance", "value": 1},
+			},
+		],
 	},
 ]
 
 ## §4.1 — maps (league, index) to a difficulty tier.
+## S21.1: Bronze expanded to 5-slot curve [2,2,2,3,3] — tier-2 openers, tier-3 closers.
 static func difficulty_for(league: String, index: int) -> int:
 	match league:
 		"scrapyard":
 			var tiers := [1, 1, 2]
 			return tiers[index] if index >= 0 and index < tiers.size() else 1
 		"bronze":
-			var tiers := [2, 2, 3]
+			var tiers := [2, 2, 2, 3, 3]
 			return tiers[index] if index >= 0 and index < tiers.size() else 2
 		_:
 			return 1
 
-## §4 — tier filter + weaker-tier fallback + variety strip.
+## §4 — tier filter + weaker-tier fallback + variety strip + (S21.1) league gating.
+##
+## current_league (S21.1): when non-empty and a recognized league string, filter
+## out templates whose `unlock_league` exceeds the current league's rank. The
+## league filter runs *after* the tier fallback but *before* the variety strip,
+## so Silver+ templates cannot leak in via either pool slot. Unknown league
+## strings (or "") skip the filter entirely for backward compatibility with any
+## call-site that hasn't been updated to thread league context.
+##
 ## player_archetype_hint unused; reserved for Sprint 13.10 counter-play.
-static func pick_opponent_loadout(difficulty_tier: int, last_archetype: int = -1, _player_archetype_hint: int = -1) -> Dictionary:
+static func pick_opponent_loadout(difficulty_tier: int, current_league: String = "", last_archetype: int = -1, _player_archetype_hint: int = -1) -> Dictionary:
 	var pool: Array = TEMPLATES.filter(func(t): return t.tier == difficulty_tier)
 	if pool.size() < 2:
 		pool += TEMPLATES.filter(func(t): return t.tier == difficulty_tier - 1)
+	if current_league != "" and LEAGUE_RANK.has(current_league):
+		var league_cap: int = LEAGUE_RANK[current_league]
+		pool = pool.filter(func(t): return LEAGUE_RANK.get(t.get("unlock_league", "scrapyard"), 0) <= league_cap)
 	if last_archetype != -1:
 		var varied: Array = pool.filter(func(t): return t.archetype != last_archetype)
-		if not varied.is_empty():
+		if varied.is_empty():
+			# S21.1: when variety would empty the pool (e.g. Bronze tier-3
+			# is all-CONTROLLER), widen to tier-(N-1) templates respecting
+			# the league cap, so the variety invariant holds without needing
+			# ≥2 archetypes per tier band. Falls through to the original
+			# "keep pool intact" only when no wider tier yields a different
+			# archetype either.
+			var wider: Array = TEMPLATES.filter(func(t): return t.tier == difficulty_tier - 1 and t.archetype != last_archetype)
+			if current_league != "" and LEAGUE_RANK.has(current_league):
+				var league_cap2: int = LEAGUE_RANK[current_league]
+				wider = wider.filter(func(t): return LEAGUE_RANK.get(t.get("unlock_league", "scrapyard"), 0) <= league_cap2)
+			if not wider.is_empty():
+				pool = wider
+		else:
 			pool = varied
 	if pool.is_empty():
 		return {}

@@ -64,7 +64,7 @@ func _t2_templates_use_valid_enums() -> void:
 			if not WeaponData.WEAPONS.has(w): ok = false
 		for m in t["modules"]:
 			if not ModuleData.MODULES.has(m): ok = false
-		if t["stance"] < 0 or t["stance"] > 2: ok = false
+		if t["stance"] < 0 or t["stance"] > 3: ok = false
 	assert_true(ok, "T2 templates_use_valid_enums")
 
 func _t3_templates_respect_slot_limits() -> void:
@@ -99,7 +99,7 @@ func _t8_picker_variety_10_picks() -> void:
 	var last := -1
 	var no_repeat := true
 	for i in 10:
-		var pick := OpponentLoadouts.pick_opponent_loadout(2, last)
+		var pick := OpponentLoadouts.pick_opponent_loadout(2, "", last)
 		if last != -1 and pick["archetype"] == last:
 			no_repeat = false
 		last = pick["archetype"]
@@ -112,7 +112,7 @@ func _t9_picker_variety_fallback_when_pool_size_1() -> void:
 	# should not crash and should return a valid template (either the controller itself via
 	# "keep pool when strip empties" OR a tier-2 fallback).
 	for i in 20:
-		var pick := OpponentLoadouts.pick_opponent_loadout(3, OpponentLoadouts.Archetype.CONTROLLER)
+		var pick := OpponentLoadouts.pick_opponent_loadout(3, "", OpponentLoadouts.Archetype.CONTROLLER)
 		if not _is_valid_template(pick):
 			assert_true(false, "T9 picker returned invalid template on iter %d" % i)
 			return
@@ -154,14 +154,18 @@ func _t11_build_opponent_brott_uses_picker() -> void:
 	assert_true(all_ok, "T11 build_opponent_brott_uses_picker — brott fields match a template")
 
 func _t12_build_opponent_brott_variety() -> void:
-	# scrapyard[2] tier 2. Pool at tier 2 has 3 templates across ≥2 archetypes.
-	# 5 consecutive builds with the same GameState: never back-to-back same archetype.
+	# S21.1 remediation (Gizmo §6.2b / Optic D4): scrapyard now filters Silver+
+	# templates via `unlock_league`, leaving only `tank_tincan` (TANK) in the
+	# effective scrapyard pool. Variety is therefore not achievable under
+	# scrapyard anymore — the variety invariant now lives on bronze+ pools,
+	# which have ≥3 distinct archetypes at tier 2. Re-target this test to
+	# bronze[2] (tier 2) to preserve the "no back-to-back archetype" intent.
 	var gs := GameState.new()
 	var last_arch: int = -1
 	var no_repeat := true
 	var any_brott := true
 	for i in 5:
-		var b: BrottState = OpponentData.build_opponent_brott("scrapyard", 2, gs)
+		var b: BrottState = OpponentData.build_opponent_brott("bronze", 2, gs)
 		if b == null:
 			any_brott = false
 			break
@@ -180,5 +184,5 @@ func _t13_build_opponent_brott_null_game_state() -> void:
 
 func _t14_picker_accepts_player_archetype_hint() -> void:
 	# Signature stability: third param (player_archetype_hint) accepted without error.
-	var pick: Dictionary = OpponentLoadouts.pick_opponent_loadout(2, -1, OpponentLoadouts.Archetype.TANK)
+	var pick: Dictionary = OpponentLoadouts.pick_opponent_loadout(2, "", -1, OpponentLoadouts.Archetype.TANK)
 	assert_true(_is_valid_template(pick), "T14 picker_accepts_player_archetype_hint — valid template with hint param")

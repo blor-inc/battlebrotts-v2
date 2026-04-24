@@ -100,7 +100,7 @@ func _run_all() -> void:
 
 # --- AC-1: ScrollContainer exists and is sized correctly ---
 func _test_ac1_scroll_area_shape() -> void:
-	print("AC-1: ScrollArea exists, bounded, horizontal disabled, follow_focus on")
+	print("AC-1: ScrollArea exists, bounded, horizontal disabled, follow_focus off (S21.4 #105)")
 	var screen := _make_screen(5)
 	var scroll := screen.get_node_or_null("ScrollArea") as ScrollContainer
 	assert_true(scroll != null, "ScrollArea exists")
@@ -108,7 +108,8 @@ func _test_ac1_scroll_area_shape() -> void:
 		assert_eq(scroll.size.y, 520.0, "ScrollArea.size.y == 520")
 		assert_eq(scroll.position.y, 120.0, "ScrollArea.position.y == 120")
 		assert_eq(scroll.horizontal_scroll_mode, ScrollContainer.SCROLL_MODE_DISABLED, "horizontal scroll disabled")
-		assert_true(scroll.follow_focus, "follow_focus = true")
+		# S21.4 #105: AC-1 inverted — follow_focus = false is now the correct contract. See PR #254 / I-A2.
+		assert_false(scroll.follow_focus, "follow_focus = false (per S21.4 #105 fix)")
 		var content := scroll.get_node_or_null("Content")
 		assert_true(content != null and content is VBoxContainer, "Content VBox exists inside ScrollArea")
 	_cleanup(screen)

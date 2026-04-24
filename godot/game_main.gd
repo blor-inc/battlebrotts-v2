@@ -597,7 +597,8 @@ func _spawn_arena_first_encounter(key: String) -> Control:
 	var anchor_center_x := anchor_global.position.x + anchor_global.size.x * 0.5
 
 	# Default: position panel left edge so it centres on the anchor (clamped to viewport).
-	var viewport_size := get_viewport().get_visible_rect().size
+	var vp := get_viewport()
+	var viewport_size := vp.get_visible_rect().size if vp != null else Vector2(1280.0, 720.0)
 	var panel_x := clampf(anchor_center_x - panel_w * 0.5, 8.0, viewport_size.x - panel_w - 8.0)
 
 	# Default: panel sits BELOW the anchor (pointer ▲ points up at anchor).

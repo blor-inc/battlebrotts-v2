@@ -30,11 +30,23 @@ var _prev_weapons: Array[int] = []
 var _prev_armor: int = 0
 var _prev_modules: Array[int] = []
 
+# [S21.4 / #105] Preserves ScrollArea scroll position across _build_ui()
+# teardown/rebuild cycles (weapon/armor/module/chassis tap). Same pattern
+# as shop_screen.gd S17.1-001. Save on rebuild entry, restore one frame later
+# via call_deferred so the new VBox has finalized its minimum size.
+var _saved_scroll_v: int = 0
+
 func setup(state: GameState) -> void:
 	game_state = state
 	_build_ui()
 
 func _build_ui() -> void:
+	# [S21.4 / #105] Capture current scroll position BEFORE tearing down the
+	# tree so we can restore it after rebuild (prevents jump-to-top on item tap).
+	var prior_scroll := get_node_or_null("ScrollArea") as ScrollContainer
+	if prior_scroll != null:
+		_saved_scroll_v = prior_scroll.scroll_vertical
+
 	for c in get_children():
 		c.queue_free()
 
@@ -83,7 +95,12 @@ func _build_ui() -> void:
 	scroll.custom_minimum_size = Vector2(1280, 520)
 	scroll.size = Vector2(1280, 520)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.follow_focus = true
+	# [S21.4 / #105] follow_focus=true was the root cause of scroll reset: pressing
+	# any Button inside the ScrollContainer transferred keyboard focus to it, and
+	# Godot's follow_focus logic auto-scrolled to make the focused node visible.
+	# Setting false prevents that implicit scroll; keyboard navigation is not
+	# required in the loadout (gamepad/touchscreen UI).
+	scroll.follow_focus = false
 	add_child(scroll)
 
 	var content := VBoxContainer.new()
@@ -115,6 +132,17 @@ func _build_ui() -> void:
 	_equip_button.disabled = not validation["valid"]
 	_equip_button.pressed.connect(func(): continue_pressed.emit())
 	add_child(_equip_button)
+
+	# [S21.4 / #105] Restore scroll position on next frame (after layout so
+	# ScrollContainer.max_scroll_v reflects new content). Engine clamps to
+	# [0, max_scroll_v] so large/stale values resolve safely.
+	call_deferred("_restore_scroll")
+
+func _restore_scroll() -> void:
+	var scroll := get_node_or_null("ScrollArea") as ScrollContainer
+	if scroll == null:
+		return
+	scroll.scroll_vertical = _saved_scroll_v
 
 ## [S17.1-002] Section builders — append to a VBoxContainer instead of
 ## absolute-positioning at a running y. Card/indicator rendering logic

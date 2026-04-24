@@ -5,6 +5,10 @@ extends Node2D
 const ARENA_OFFSET := Vector2(384, 60)
 const TICKS_PER_SEC := 10
 
+# [S21.4 / #106] Minimum interval between random-event popups (seconds).
+# No magic numbers inline — all dampening checks reference this constant.
+const RANDOM_EVENT_MIN_INTERVAL_SEC := 15.0
+
 # [S21.2 / #107] First-encounter overlay keys, parameterizing the S17.1-004
 # FirstRunState scaffolding to 4 surfaces total. `energy_explainer` is the
 # original S17.1-004 key (reused so existing player saves carry the dismissal
@@ -81,6 +85,13 @@ var _pending_league_ceremony: String = ""
 var _league_signal_connected: bool = false
 var _concede_confirm: AcceptDialog = null
 
+# [S21.4 / #106] Random-event popup controller state.
+# _re_popup: active popup node (null when none visible).
+# _re_last_shown_time: Engine.get_ticks_msec() / 1000.0 at last popup show; -inf on reset.
+# Used for dampening: a second trigger within RANDOM_EVENT_MIN_INTERVAL_SEC is suppressed.
+var _re_popup: Control = null
+var _re_last_shown_time: float = -INF
+
 func _ready() -> void:
 	game_flow = GameFlow.new()
 	_connect_league_signal()
@@ -126,6 +137,11 @@ func _clear_screen() -> void:
 		_arena_fe_ticks = 0
 		_arena_fe_active_key = ""
 		speed_multiplier = _arena_fe_pre_slowdown_speed
+	# [S21.4 / #106] Tear down any visible random-event popup on arena exit.
+	if _re_popup != null and is_instance_valid(_re_popup):
+		_re_popup.queue_free()
+	_re_popup = null
+	_re_last_shown_time = -INF
 	# Clear HUD labels
 	for child in get_children():
 		if child is Label:
@@ -358,6 +374,15 @@ func _create_arena_hud() -> void:
 	energy_legend.position = Vector2(20.0, 42.0)
 	energy_legend.size = Vector2(120.0, 20.0)
 	add_child(energy_legend)
+	# [S21.4 / #106] Named anchor for random-event popup positioning.
+	# Mirrors S21.3 EnergyLegend sibling pattern: Node2D child of GameMain,
+	# created imperatively here, named EXACTLY "RandomEventPopupAnchor".
+	# Positioned below the HUD top-row cluster (PlayerInfo/EnemyInfo/TimeLabel
+	# bottom edge is y=40; anchor sits at y=50 to satisfy I-B3/I-B4c).
+	var re_anchor := Node2D.new()
+	re_anchor.name = "RandomEventPopupAnchor"
+	re_anchor.position = Vector2(384.0, 50.0)
+	add_child(re_anchor)
 	# [S21.3 / #245 / #107] Start the arena-entry onboarding sequence.
 	# This is the arena-entry hook (per-match entry, not screen show/enter).
 	# Replaces the S21.2 per-screen FE_KEY_ENERGY spawn so the overlay
@@ -725,3 +750,114 @@ func _find_concede_button() -> Control:
 		if child.name == "ConcedeButton" and child is Button:
 			return child as Control
 	return null
+
+# ─────────────────────────────────────────────────────────────────────────────
+# [S21.4 / #106] Random-event popup controller
+# "Interruption → Flow" redesign: popup is skippable, dampened, and anchored
+# to a named node so Optic can verify structure without screenshots.
+#
+# Public entry point: show_random_event(event_data: Dictionary)
+#   event_data keys (all optional):
+#     "title"   : String  — heading text (default: "Random Event")
+#     "body"    : String  — body copy
+#     "choices" : Array   — reserved for future choice-branch wiring (not in S21.4)
+#
+# Invariants satisfied:
+#   I-B1: SkipButton present, visible, enabled; pressing it frees popup.
+#   I-B2: Dampening interval is RANDOM_EVENT_MIN_INTERVAL_SEC (named const above).
+#   I-B3: RandomEventPopupAnchor node exists as add_child(self) sibling in _create_arena_hud().
+#   I-B5: SkipButton visible + disabled=false at popup show moment.
+#   I-B6: Second trigger within interval is suppressed (dampening).
+#   I-B7: No SFX wiring.
+# ─────────────────────────────────────────────────────────────────────────────
+
+## Trigger a random-event popup. Respects dampening interval (I-B2/I-B6).
+## If a popup is already visible, or the interval has not elapsed, call is a no-op.
+func show_random_event(event_data: Dictionary = {}) -> void:
+	# Dampening check (I-B6): suppress if within RANDOM_EVENT_MIN_INTERVAL_SEC.
+	var now := Engine.get_ticks_msec() / 1000.0
+	if now - _re_last_shown_time < RANDOM_EVENT_MIN_INTERVAL_SEC:
+		return
+	# Guard: only one popup at a time.
+	if _re_popup != null and is_instance_valid(_re_popup):
+		return
+	_re_last_shown_time = now
+	_re_popup = _build_random_event_popup(event_data)
+	add_child(_re_popup)
+
+## Build the popup node subtree.
+## Returns a Panel with: TitleLabel, BodyLabel, SkipButton, anchor_target metadata.
+func _build_random_event_popup(event_data: Dictionary) -> Panel:
+	var title_text: String = event_data.get("title", "Random Event") as String
+	var body_text: String = event_data.get("body", "") as String
+
+	# Locate anchor — RandomEventPopupAnchor must exist (created in _create_arena_hud).
+	var anchor: Node = get_node_or_null("RandomEventPopupAnchor")
+	if anchor == null:
+		# Fallback: synthesise so popup still shows (graceful degradation).
+		anchor = Node2D.new()
+		anchor.name = "RandomEventPopupAnchor"
+		anchor.set_meta("synthesised", true)
+		add_child(anchor)
+
+	var panel := Panel.new()
+	panel.name = "RandomEventPopup"
+	panel.z_index = 20
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	# Size / position: centred below anchor.
+	var popup_w := 480.0
+	var popup_h := 140.0
+	var anchor_pos: Vector2 = anchor.position if anchor.has_method("get_global_transform") == false else anchor.global_position
+	# Centre the popup on the anchor x; push down 8px from anchor y.
+	panel.position = Vector2(anchor_pos.x - popup_w * 0.5, anchor_pos.y + 8.0)
+	panel.size = Vector2(popup_w, popup_h)
+
+	# Store anchor reference as metadata for Optic structural asserts (I-B3/I-B4).
+	panel.set_meta("anchor_target", anchor)
+
+	# Title label.
+	var title_lbl := Label.new()
+	title_lbl.name = "TitleLabel"
+	title_lbl.text = title_text
+	title_lbl.add_theme_font_size_override("font_size", 16)
+	title_lbl.add_theme_color_override("font_color", Color(0.95, 0.85, 0.3))
+	title_lbl.position = Vector2(16.0, 12.0)
+	title_lbl.size = Vector2(popup_w - 32.0, 24.0)
+	panel.add_child(title_lbl)
+
+	# Body label.
+	var body_lbl := Label.new()
+	body_lbl.name = "BodyLabel"
+	body_lbl.text = body_text
+	body_lbl.add_theme_font_size_override("font_size", 13)
+	body_lbl.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+	body_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body_lbl.position = Vector2(16.0, 42.0)
+	body_lbl.size = Vector2(popup_w - 32.0, 52.0)
+	panel.add_child(body_lbl)
+
+	# Skip button (I-B1 / I-B5): visible, enabled, wired to dismiss.
+	var skip_btn := Button.new()
+	skip_btn.name = "SkipButton"
+	skip_btn.text = "Skip"
+	skip_btn.visible = true        # I-B5: visible at show moment
+	skip_btn.disabled = false      # I-B5: enabled at show moment
+	skip_btn.position = Vector2(popup_w - 104.0, popup_h - 36.0)
+	skip_btn.size = Vector2(88.0, 28.0)
+	skip_btn.pressed.connect(_on_random_event_skipped)
+	panel.add_child(skip_btn)
+
+	return panel
+
+## Called when the player presses SkipButton (I-B1).
+func _on_random_event_skipped() -> void:
+	_dismiss_random_event_popup()
+
+## Dismiss the active random-event popup (I-B1: frees from scene tree).
+func _dismiss_random_event_popup() -> void:
+	if _re_popup == null:
+		return
+	if is_instance_valid(_re_popup):
+		_re_popup.queue_free()
+	_re_popup = null

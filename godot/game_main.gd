@@ -109,6 +109,13 @@ var _projectile_launch_sfx_player: AudioStreamPlayer = null
 # boundary-tick / splash / reflect spam (risk register §5 risk #1).
 const HIT_SFX_MIN_AMOUNT: float = 5.0
 
+# [S24.4] Combat SFX — critical hit + death.
+const CRITICAL_HIT_SFX: AudioStream = preload("res://assets/audio/sfx/critical_hit.ogg")
+const DEATH_SFX: AudioStream = preload("res://assets/audio/sfx/death.ogg")
+var _critical_hit_sfx_player: AudioStreamPlayer = null
+var _death_sfx_player: AudioStreamPlayer = null
+var _death_sfx_cooldown_active: bool = false  # guard: prevent mass-death frame spam
+
 func _ready() -> void:
 	game_flow = GameFlow.new()
 	_connect_league_signal()
@@ -343,6 +350,8 @@ func _start_demo_match() -> void:
 	# [S24.3] Wire combat SFX signals.
 	sim.on_damage.connect(_on_combat_damage)
 	sim.on_projectile_spawned.connect(_on_projectile_spawned)
+	# [S24.4] Wire death SFX signal.
+	sim.on_death.connect(_on_brott_death)
 	
 	# Instantiate arena renderer from scene (KB: no set_script/Script.new in web)
 	arena_renderer = ArenaRendererScene.instantiate()
@@ -380,6 +389,8 @@ func _start_match(opponent_index: int) -> void:
 	# [S24.3] Wire combat SFX signals.
 	sim.on_damage.connect(_on_combat_damage)
 	sim.on_projectile_spawned.connect(_on_projectile_spawned)
+	# [S24.4] Wire death SFX signal.
+	sim.on_death.connect(_on_brott_death)
 	
 	# Instantiate from scene so _draw() virtual is properly registered in web export
 	# (Script.new() and set_script() both fail to register _draw in HTML5 builds)
@@ -877,11 +888,44 @@ func _init_combat_sfx_players() -> void:
 	_projectile_launch_sfx_player.stream = PROJECTILE_LAUNCH_SFX
 	add_child(_projectile_launch_sfx_player)
 
+	# [S24.4] Critical hit SFX player.
+	_critical_hit_sfx_player = AudioStreamPlayer.new()
+	_critical_hit_sfx_player.name = "CriticalHitSfxPlayer"
+	_critical_hit_sfx_player.bus = "SFX"  # MUST be set BEFORE add_child per S21.5 convention
+	_critical_hit_sfx_player.stream = CRITICAL_HIT_SFX
+	add_child(_critical_hit_sfx_player)
+
+	# [S24.4] Death SFX player.
+	_death_sfx_player = AudioStreamPlayer.new()
+	_death_sfx_player.name = "DeathSfxPlayer"
+	_death_sfx_player.bus = "SFX"  # MUST be set BEFORE add_child per S21.5 convention
+	_death_sfx_player.stream = DEATH_SFX
+	add_child(_death_sfx_player)
+
 # [S24.3] Signal handler: on_damage — play hit SFX for meaningful hits.
-# Guard: amount >= HIT_SFX_MIN_AMOUNT to suppress boundary-tick / splash / reflect spam.
-func _on_combat_damage(_target, amount: float, _is_crit: bool, _pos: Vector2) -> void:
-	if amount >= HIT_SFX_MIN_AMOUNT and _hit_sfx_player != null and is_instance_valid(_hit_sfx_player):
-		_hit_sfx_player.play()
+# [S24.4] Crit branch: critical hits always play critical_hit SFX; normal hits guarded by threshold.
+func _on_combat_damage(_target, amount: float, is_crit: bool, _pos: Vector2) -> void:
+	if is_crit:
+		if _critical_hit_sfx_player != null and is_instance_valid(_critical_hit_sfx_player):
+			_critical_hit_sfx_player.play()
+	elif amount >= HIT_SFX_MIN_AMOUNT:
+		if _hit_sfx_player != null and is_instance_valid(_hit_sfx_player):
+			_hit_sfx_player.play()
+
+# [S24.4] Signal handler: on_death — play death SFX once per match-end window.
+# Cooldown guard: on_death fires per-brott; in mass-death scenarios multiple brotts
+# die in the same tick. Guard prevents overlapping playback — only the first death
+# in a 600ms window plays. This is intentional: one death sound per match-end cluster
+# is more impactful than 2-3 overlapping. Cooldown auto-resets after 600ms.
+func _on_brott_death(_brott) -> void:
+	if _death_sfx_cooldown_active:
+		return
+	if _death_sfx_player != null and is_instance_valid(_death_sfx_player):
+		_death_sfx_cooldown_active = true
+		_death_sfx_player.play()
+		# Reset cooldown after 600ms to allow future matches to play death SFX.
+		await get_tree().create_timer(0.6).timeout
+		_death_sfx_cooldown_active = false
 
 # [S24.3] Signal handler: on_projectile_spawned — play launch SFX per projectile.
 func _on_projectile_spawned(_proj) -> void:

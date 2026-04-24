@@ -369,7 +369,7 @@ chassis, weapons, armor, modules, and stance.
 | `control_static` | Static | CONTROLLER | 3 | Bronze | Brawler + Arc Emitter + Shotgun + Reactive + Repair Nanites |
 | `control_prowler` | Prowler | CONTROLLER | 3 | Bronze | Scout + Arc Emitter + Reactive + Repair Nanites |
 | `tank_bulwark` | Bulwark | TANK | 3 | Silver | Brawler + Shotgun + Flak Cannon + Reactive + Shield Projector + Repair Nanites |
-| `glass_trueshot` | Trueshot | GLASS_CANNON | 3 | Silver | Scout + Railgun + Reactive + Sensor Array + Overclock |
+| `glass_trueshot` | Trueshot | GLASS_CANNON | 3 | Silver | Scout + Railgun + None + Sensor Array + Overclock |
 | `skirmish_harrier` | Harrier | SKIRMISHER | 3 | Silver | Scout + Flak Cannon + Reactive + Sensor Array + Overclock |
 | `bruiser_enforcer` | Enforcer | BRUISER | 3 | Silver | Brawler + Minigun + Arc Emitter + Plating + Shield Projector + Overclock |
 | `control_disruptor` | Disruptor | CONTROLLER | 4 | Silver | Brawler + Arc Emitter + Flak Cannon + Reactive + Shield Projector + Sensor Array |

@@ -68,6 +68,8 @@ const SPRINT_TEST_FILES := [
 	"res://tests/test_s21_3_arena_onboarding.gd",
 	# [S21.4 T1] Scroll position preserved in shop/loadout on child-node tap (#105).
 	"res://tests/test_s21_4_001_scroll_position.gd",
+	# [S21.4 T2] Random-event popup redesign — named anchor + skip button + dampening (#106).
+	"res://tests/test_s21_4_002_event_popup.gd",
 ]
 
 var file_pass_count := 0

@@ -85,6 +85,13 @@ Expected future triggers:
   (D3+GDD+finalize). Neither timed out. Pattern validated on first
   application. Ceiling held at ~1 medium edit + ~2 small edits + test
   coverage per spawn.
+- **S21.3 (2026-04-24):** Nutts timed out at 1800s ceiling on `github-copilot/claude-sonnet-4.6`
+  (L-size build: 3 files, +667/−5, 11 test functions). Build was substantively complete at
+  timeout; PR body `$PR_BODY` heredoc bug left in finalization step, patched by orchestrator.
+  Work landed clean without respawn. **Key update: timeout pattern is model-agnostic**
+  — prior data was all on Opus 4.7; S21.3 confirms Sonnet 4.6 hits the same ceiling on
+  L-size tasks. The pattern is task-size-specific, not model-specific.
+  Ref: studio-framework#57 comment (2026-04-24).
 - **Revisit:** if a future sprint hits a Nutts timeout despite the
   split-spawn pattern, escalate to a dedicated tooling sprint on
   Nutts checkpointing.

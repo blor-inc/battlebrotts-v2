@@ -260,11 +260,10 @@ const TEMPLATES: Array[Dictionary] = [
 		"weapons": [WeaponData.WeaponType.SHOTGUN, WeaponData.WeaponType.FLAK_CANNON],
 		"armor": ArmorData.ArmorType.REACTIVE_MESH,
 		"modules": [ModuleData.ModuleType.REPAIR_NANITES, ModuleData.ModuleType.SENSOR_ARRAY],
-		"stance": 0,  # Aggressive
+		"stance": 1,  # Defensive
 		"unlock_league": "silver",
 		# weight: 12 (Shotgun) + 13 (Flak) + 8 (Reactive) + 7 (Repair) + 4 (Sensor) = 44 <= 55 (Brawler)
-		# S22.2b-p1: removed Shield Projector; added Sensor Array.
-		# S22.2b-p2: stance Defensive→Aggressive; closes into Shotgun killbox (engagement-distance fix).
+		# S22.2b: removed Shield Projector (broke Shield+Reactive+Defensive triangle); added Sensor Array.
 		"behavior_cards": [
 			{
 				"trigger": {"kind": "enemy_within_tiles", "value": 3},
@@ -315,12 +314,11 @@ const TEMPLATES: Array[Dictionary] = [
 		"tier": 3,
 		"chassis": ChassisData.ChassisType.SCOUT,
 		"weapons": [WeaponData.WeaponType.FLAK_CANNON],
-		"armor": ArmorData.ArmorType.NONE,
-		"modules": [ModuleData.ModuleType.SENSOR_ARRAY, ModuleData.ModuleType.OVERCLOCK, ModuleData.ModuleType.AFTERBURNER],
+		"armor": ArmorData.ArmorType.REACTIVE_MESH,
+		"modules": [ModuleData.ModuleType.SENSOR_ARRAY, ModuleData.ModuleType.OVERCLOCK],
 		"stance": 2,  # Kiting
 		"unlock_league": "silver",
-		# weight: 13 (Flak) + 0 (None) + 4 (Sensor) + 5 (Overclock) + 6 (Afterburner) = 28 <= 30 (Scout)
-		# S22.2b-p2: Reactive Mesh→None; add Afterburner. Glassier kiter; reflect-trap removed.
+		# weight: 13 (Flak) + 8 (Reactive) + 4 (Sensor) + 5 (Overclock) = 30 <= 30 (Scout, exactly at cap)
 		"behavior_cards": [
 			{
 				"trigger": {"kind": "enemy_beyond_tiles", "value": 5},
@@ -345,11 +343,10 @@ const TEMPLATES: Array[Dictionary] = [
 		"weapons": [WeaponData.WeaponType.MINIGUN, WeaponData.WeaponType.ARC_EMITTER],
 		"armor": ArmorData.ArmorType.REACTIVE_MESH,
 		"modules": [ModuleData.ModuleType.SHIELD_PROJECTOR, ModuleData.ModuleType.OVERCLOCK],
-		"stance": 2,  # Kiting
+		"stance": 1,  # Defensive
 		"unlock_league": "silver",
 		# weight: 10 (Minigun) + 11 (Arc) + 8 (Reactive) + 10 (Shield) + 5 (Overclock) = 44 <= 55 (Brawler)
-		# S22.2b-p1: Plating→Reactive Mesh; stance Aggressive→Defensive.
-		# S22.2b-p2: stance Defensive→Kiting; pulls engagement to 3.5 tiles (inside player Shotgun range).
+		# S22.2b: Plating→Reactive Mesh; stance Aggressive→Defensive. Patient pressure > charge-into-killbox.
 		"behavior_cards": [
 			{
 				"trigger": {"kind": "enemy_within_tiles", "value": 4},
@@ -374,11 +371,10 @@ const TEMPLATES: Array[Dictionary] = [
 		"weapons": [WeaponData.WeaponType.ARC_EMITTER, WeaponData.WeaponType.FLAK_CANNON],
 		"armor": ArmorData.ArmorType.REACTIVE_MESH,
 		"modules": [ModuleData.ModuleType.OVERCLOCK, ModuleData.ModuleType.SENSOR_ARRAY],
-		"stance": 2,  # Kiting
+		"stance": 1,  # Defensive
 		"unlock_league": "silver",
 		# weight: 11 (Arc) + 13 (Flak) + 8 (Reactive) + 5 (Overclock) + 4 (Sensor) = 41 <= 55 (Brawler)
-		# S22.2b-p1: Shield Projector→Overclock; burst-DPS controller profile.
-		# S22.2b-p2: stance Defensive→Kiting; engagement-distance fix (4.2 tiles vs 5.1-tile wall).
+		# S22.2b: Shield Projector→Overclock; burst-DPS controller profile replaces absorb-wall.
 		"behavior_cards": [
 			{
 				"trigger": {"kind": "enemy_within_tiles", "value": 3},
@@ -409,11 +405,10 @@ const TEMPLATES: Array[Dictionary] = [
 		"weapons": [WeaponData.WeaponType.RAILGUN, WeaponData.WeaponType.MINIGUN],
 		"armor": ArmorData.ArmorType.REACTIVE_MESH,
 		"modules": [ModuleData.ModuleType.SHIELD_PROJECTOR, ModuleData.ModuleType.SENSOR_ARRAY],
-		"stance": 2,  # Kiting
+		"stance": 1,  # Defensive
 		"unlock_league": "silver",
 		# weight: 15 (Railgun) + 10 (Minigun) + 8 (Reactive) + 10 (Shield) + 4 (Sensor) = 47 <= 55 (Brawler)
-		# S22.2b-p1: Repair Nanites→Sensor Array; Shield identity preserved.
-		# S22.2b-p2: stance Defensive→Kiting; 8.4-tile engagement vs 10.2-tile unreachable wall.
+		# S22.2b: Repair Nanites→Sensor Array; keeps Shield identity but loses dual-sustain stack.
 		"behavior_cards": [
 			{
 				"trigger": {"kind": "enemy_beyond_tiles", "value": 6},
@@ -441,13 +436,13 @@ const TEMPLATES: Array[Dictionary] = [
 		"tier": 4,
 		"chassis": ChassisData.ChassisType.SCOUT,
 		"weapons": [WeaponData.WeaponType.RAILGUN],
-		"armor": ArmorData.ArmorType.NONE,
-		"modules": [ModuleData.ModuleType.SENSOR_ARRAY, ModuleData.ModuleType.OVERCLOCK],
-		"stance": 2,  # Kiting
+		"armor": ArmorData.ArmorType.REACTIVE_MESH,
+		"modules": [ModuleData.ModuleType.SENSOR_ARRAY],
+		"stance": 3,  # Ambush
 		"unlock_league": "silver",
-		# weight: 15 (Railgun) + 0 (None) + 4 (Sensor) + 5 (Overclock) = 24 <= 30 (Scout)
-		# S22.2b-p1: None→Reactive Mesh; dropped Overclock.
-		# S22.2b-p2: armor Reactive→None (reflect-trap fix); restore Overclock; stance Ambush→Kiting (mobility).
+		# weight: 15 (Railgun) + 8 (Reactive) + 4 (Sensor) = 27 <= 30 (Scout)
+		# S22.2b: None→Reactive Mesh; dropped Overclock to fit cap. One-module Scout is loadout-legal.
+		# Ambush+Railgun sniper identity preserved; Reactive opens survival window vs Minigun+Shotgun burst.
 		"behavior_cards": [
 			{
 				"trigger": {"kind": "enemy_beyond_tiles", "value": 7},

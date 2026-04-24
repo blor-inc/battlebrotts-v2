@@ -87,7 +87,7 @@ var _concede_confirm: AcceptDialog = null
 
 # [S21.4 / #106] Random-event popup controller state.
 # _re_popup: active popup node (null when none visible).
-# _re_last_shown_time: Engine.get_ticks_msec() / 1000.0 at last popup show; -inf on reset.
+# _re_last_shown_time: Time.get_ticks_msec() / 1000.0 at last popup show; -inf on reset.
 # Used for dampening: a second trigger within RANDOM_EVENT_MIN_INTERVAL_SEC is suppressed.
 var _re_popup: Control = null
 var _re_last_shown_time: float = -INF
@@ -775,7 +775,7 @@ func _find_concede_button() -> Control:
 ## If a popup is already visible, or the interval has not elapsed, call is a no-op.
 func show_random_event(event_data: Dictionary = {}) -> void:
 	# Dampening check (I-B6): suppress if within RANDOM_EVENT_MIN_INTERVAL_SEC.
-	var now := Engine.get_ticks_msec() / 1000.0
+	var now := Time.get_ticks_msec() / 1000.0
 	if now - _re_last_shown_time < RANDOM_EVENT_MIN_INTERVAL_SEC:
 		return
 	# Guard: only one popup at a time.

@@ -192,11 +192,12 @@ func _test_dampening_suppresses_second_trigger() -> void:
 	_assert(gm.get("_re_popup") == null, "Popup dismissed between triggers")
 
 	# Second trigger within RANDOM_EVENT_MIN_INTERVAL_SEC / 2 (dampening window).
-	# _re_last_shown_time was set during first show; Engine.get_ticks_msec() /
+	# _re_last_shown_time was set during first show; Time.get_ticks_msec() /
 	# 1000.0 is still within the interval (same ms frame in headless test).
+	# NOTE: check _re_popup (null = suppressed) not get_node_or_null("RandomEventPopup")
+	# because queue_free() defers removal; the dismissed node is still in tree.
 	gm.show_random_event({"title": "Event B"})
-	var popup_second: Node = gm.get_node_or_null("RandomEventPopup")
-	_assert(popup_second == null,
+	_assert(gm.get("_re_popup") == null,
 		"Second trigger within RANDOM_EVENT_MIN_INTERVAL_SEC is suppressed (I-B6)")
 
 	gm.free()

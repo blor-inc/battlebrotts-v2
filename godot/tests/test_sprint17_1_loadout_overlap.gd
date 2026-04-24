@@ -109,7 +109,7 @@ func _test_ac1_scroll_area_shape() -> void:
 		assert_eq(scroll.position.y, 120.0, "ScrollArea.position.y == 120")
 		assert_eq(scroll.horizontal_scroll_mode, ScrollContainer.SCROLL_MODE_DISABLED, "horizontal scroll disabled")
 		# S21.4 #105: AC-1 inverted — follow_focus = false is now the correct contract. See PR #254 / I-A2.
-		assert_false(scroll.follow_focus, "follow_focus = false (per S21.4 #105 fix)")
+		assert_true(not scroll.follow_focus, "follow_focus = false (per S21.4 #105 fix)")
 		var content := scroll.get_node_or_null("Content")
 		assert_true(content != null and content is VBoxContainer, "Content VBox exists inside ScrollArea")
 	_cleanup(screen)

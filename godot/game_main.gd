@@ -99,6 +99,7 @@ var _popup_whoosh_player: AudioStreamPlayer = null
 func _ready() -> void:
 	game_flow = GameFlow.new()
 	_connect_league_signal()
+	_apply_audio_settings()  # [S21.5] apply persisted mute on canonical main-flow entry
 	# URL parameter routing for web builds (enables Playwright screen tests)
 	if OS.has_feature("web"):
 		var screen_param = JavaScriptBridge.eval("new URLSearchParams(window.location.search).get('screen')")
@@ -115,6 +116,16 @@ func _ready() -> void:
 			return
 	# Default: show main menu (also handles ?screen=menu and ?screen=dashboard)
 	_show_main_menu()
+
+# [S21.5] Mirrors main.gd — applies persisted mute state from FirstRunState to
+# the Master bus (bus 0) on scene load. Called from _ready() so mute state is
+# honoured on the canonical game flow (Menu → Shop → … → Arena).
+func _apply_audio_settings() -> void:
+	var frs := get_node_or_null("/root/FirstRunState")
+	if frs == null:
+		return
+	var muted: bool = frs.call("get_audio_muted")
+	AudioServer.set_bus_mute(0, muted)
 
 func _clear_screen() -> void:
 	if ui_scroll:

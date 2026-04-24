@@ -1,65 +1,89 @@
 ## test_s24_4_003_sfx_assets.gd
-## [S24.4] Verify SFX asset files exist: new critical_hit.ogg + death.ogg; S24.3 preserved.
-extends Node
+## [S24.4] Verify SFX asset files exist: new critical_hit.ogg + death.ogg; S24.3/S21.5 preserved.
+## Usage: godot --headless --path godot/ --script res://tests/test_s24_4_003_sfx_assets.gd
+
+extends SceneTree
 
 var pass_count := 0
 var fail_count := 0
+var test_count := 0
 
-func _run_test(desc: String, cond: bool) -> void:
+func _initialize() -> void:
+	print("=== test_s24_4_003_sfx_assets ===\n")
+	_test_critical_hit_ogg_exists()
+	_test_death_ogg_exists()
+	_test_attribution_md_exists()
+	_test_attribution_md_has_critical_hit_entry()
+	_test_attribution_md_has_death_entry()
+	_test_hit_ogg_preserved()
+	_test_projectile_launch_ogg_preserved()
+	_test_win_chime_ogg_preserved()
+	_test_popup_whoosh_ogg_preserved()
+	print("\n=== Results: %d passed, %d failed, %d total ===" % [pass_count, fail_count, test_count])
+	quit(1 if fail_count > 0 else 0)
+
+func _assert(cond: bool, msg: String) -> void:
+	test_count += 1
 	if cond:
 		pass_count += 1
-		print("  PASS: %s" % desc)
+		print("  PASS: %s" % msg)
 	else:
 		fail_count += 1
-		print("  FAIL: %s" % desc)
+		print("  FAIL: %s" % msg)
 
-func run() -> int:
-	print("\n=== test_s24_4_003_sfx_assets ===")
+func _test_critical_hit_ogg_exists() -> void:
+	print("--- T3a: critical_hit.ogg exists (S24.4 new asset) ---")
+	_assert(FileAccess.file_exists("res://assets/audio/sfx/critical_hit.ogg"),
+		"critical_hit.ogg exists at res://assets/audio/sfx/")
 
-	# T3a: critical_hit.ogg exists (S24.4 new asset)
-	_run_test("critical_hit.ogg exists at res://assets/audio/sfx/",
-		FileAccess.file_exists("res://assets/audio/sfx/critical_hit.ogg"))
+func _test_death_ogg_exists() -> void:
+	print("--- T3b: death.ogg exists (S24.4 new asset) ---")
+	_assert(FileAccess.file_exists("res://assets/audio/sfx/death.ogg"),
+		"death.ogg exists at res://assets/audio/sfx/")
 
-	# T3b: death.ogg exists (S24.4 new asset)
-	_run_test("death.ogg exists at res://assets/audio/sfx/",
-		FileAccess.file_exists("res://assets/audio/sfx/death.ogg"))
+func _test_attribution_md_exists() -> void:
+	print("--- T3c: ATTRIBUTION.md exists ---")
+	_assert(FileAccess.file_exists("res://assets/audio/sfx/ATTRIBUTION.md"),
+		"ATTRIBUTION.md exists at res://assets/audio/sfx/")
 
-	# T3c: ATTRIBUTION.md exists and is non-empty
-	var attr_exists := FileAccess.file_exists("res://assets/audio/sfx/ATTRIBUTION.md")
-	_run_test("ATTRIBUTION.md exists at res://assets/audio/sfx/", attr_exists)
-	if attr_exists:
+func _test_attribution_md_has_critical_hit_entry() -> void:
+	print("--- T3d: ATTRIBUTION.md contains critical_hit.ogg entry ---")
+	if FileAccess.file_exists("res://assets/audio/sfx/ATTRIBUTION.md"):
 		var f := FileAccess.open("res://assets/audio/sfx/ATTRIBUTION.md", FileAccess.READ)
 		var content := f.get_as_text()
 		f.close()
-		_run_test("ATTRIBUTION.md contains critical_hit.ogg entry",
-			"critical_hit.ogg" in content)
-		_run_test("ATTRIBUTION.md contains death.ogg entry",
-			"death.ogg" in content)
+		_assert("critical_hit.ogg" in content,
+			"ATTRIBUTION.md contains critical_hit.ogg entry (S24.4)")
 	else:
-		# Skip sub-tests if file missing but count them as failures
-		fail_count += 2
-		print("  FAIL: ATTRIBUTION.md critical_hit.ogg entry (file missing)")
-		print("  FAIL: ATTRIBUTION.md death.ogg entry (file missing)")
+		_assert(false, "ATTRIBUTION.md exists (required for critical_hit.ogg entry check)")
 
-	# T3d: S24.3 asset hit.ogg preserved (scope fence)
-	_run_test("hit.ogg preserved (S24.3 asset not overwritten)",
-		FileAccess.file_exists("res://assets/audio/sfx/hit.ogg"))
+func _test_attribution_md_has_death_entry() -> void:
+	print("--- T3e: ATTRIBUTION.md contains death.ogg entry ---")
+	if FileAccess.file_exists("res://assets/audio/sfx/ATTRIBUTION.md"):
+		var f := FileAccess.open("res://assets/audio/sfx/ATTRIBUTION.md", FileAccess.READ)
+		var content := f.get_as_text()
+		f.close()
+		_assert("death.ogg" in content,
+			"ATTRIBUTION.md contains death.ogg entry (S24.4)")
+	else:
+		_assert(false, "ATTRIBUTION.md exists (required for death.ogg entry check)")
 
-	# T3e: S24.3 asset projectile_launch.ogg preserved (scope fence)
-	_run_test("projectile_launch.ogg preserved (S24.3 asset not overwritten)",
-		FileAccess.file_exists("res://assets/audio/sfx/projectile_launch.ogg"))
+func _test_hit_ogg_preserved() -> void:
+	print("--- T3f: hit.ogg preserved (S24.3 scope fence) ---")
+	_assert(FileAccess.file_exists("res://assets/audio/sfx/hit.ogg"),
+		"hit.ogg preserved (S24.3 asset not overwritten)")
 
-	# T3f: S21.5 asset win_chime.ogg preserved
-	_run_test("win_chime.ogg preserved (S21.5 asset not overwritten)",
-		FileAccess.file_exists("res://assets/audio/sfx/win_chime.ogg"))
+func _test_projectile_launch_ogg_preserved() -> void:
+	print("--- T3g: projectile_launch.ogg preserved (S24.3 scope fence) ---")
+	_assert(FileAccess.file_exists("res://assets/audio/sfx/projectile_launch.ogg"),
+		"projectile_launch.ogg preserved (S24.3 asset not overwritten)")
 
-	# T3g: S21.5 asset popup_whoosh.ogg preserved
-	_run_test("popup_whoosh.ogg preserved (S21.5 asset not overwritten)",
-		FileAccess.file_exists("res://assets/audio/sfx/popup_whoosh.ogg"))
+func _test_win_chime_ogg_preserved() -> void:
+	print("--- T3h: win_chime.ogg preserved (S21.5 scope fence) ---")
+	_assert(FileAccess.file_exists("res://assets/audio/sfx/win_chime.ogg"),
+		"win_chime.ogg preserved (S21.5 asset not overwritten)")
 
-	print("--- %d passed, %d failed ---" % [pass_count, fail_count])
-	return fail_count
-
-func _ready() -> void:
-	var failures := run()
-	quit(1 if failures > 0 else 0)
+func _test_popup_whoosh_ogg_preserved() -> void:
+	print("--- T3i: popup_whoosh.ogg preserved (S21.5 scope fence) ---")
+	_assert(FileAccess.file_exists("res://assets/audio/sfx/popup_whoosh.ogg"),
+		"popup_whoosh.ogg preserved (S21.5 asset not overwritten)")

@@ -101,6 +101,10 @@ const SPRINT_TEST_FILES := [
 	"res://tests/test_s24_3_001_hit_sfx_routing.gd",
 	"res://tests/test_s24_3_002_projectile_sfx_routing.gd",
 	"res://tests/test_s24_3_003_sfx_assets.gd",
+	# [S24.4] Combat SFX — critical + death routing to SFX bus.
+	"res://tests/test_s24_4_001_crit_sfx_routing.gd",
+	"res://tests/test_s24_4_002_death_sfx_routing.gd",
+	"res://tests/test_s24_4_003_sfx_assets.gd",
 ]
 
 var file_pass_count := 0

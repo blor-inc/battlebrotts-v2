@@ -80,6 +80,8 @@ const SPRINT_TEST_FILES := [
 	"res://tests/test_s21_5_003_sfx_routing.gd",
 	# [S21.5 T4] Mute toggle — FirstRunState.set_audio_muted() + AudioServer.is_bus_mute() (I4).
 	"res://tests/test_s21_5_004_mute_toggle.gd",
+	# [S22.1] Silver league content — 7 templates + tier-4 + preview-opponent precondition fix.
+	"res://tests/test_sprint22_1.gd",
 ]
 
 var file_pass_count := 0

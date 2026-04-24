@@ -71,6 +71,7 @@ var _skip_trick: bool = false  # test hook: bypass modal in unit tests
 
 func _ready() -> void:
 	_shop_audio = AudioStreamPlayer.new()
+	_shop_audio.bus = "SFX"  # S24.1 / closes #262 — route through SFX bus per 3-bus architecture (S21.5)
 	add_child(_shop_audio)
 
 func _play_sfx(path: String) -> void:

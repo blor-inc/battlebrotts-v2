@@ -93,6 +93,10 @@ const SPRINT_TEST_FILES := [
 	"res://tests/test_sprint22_1.gd",
 	# [S22.2c] per-league reflect-damage lever unit tests (6 tests / 8 assertions).
 	"res://tests/test_sprint22_2c.gd",
+	# [S24.2] Mixer UI — slider persistence / mute integration / bus volume.
+	"res://tests/test_s24_2_001_slider_persist.gd",
+	"res://tests/test_s24_2_002_mute_integration.gd",
+	"res://tests/test_s24_2_003_bus_volume.gd",
 ]
 
 var file_pass_count := 0

@@ -83,6 +83,13 @@ var _kiting: bool = false
 ## Scout=2 (Hit&Run), Brawler=0 (Aggressive), Fortress=1 (PlayItSafe).
 var _default_stance: int = 0
 
+## S25.4: Enemy context for multi-target priority selection (set by combat_sim each tick).
+var _enemies_context: Array = []
+
+## S25.4: Set the enemies available for targeting this tick.
+func set_enemies_context(enemies: Array) -> void:
+	_enemies_context = enemies
+
 ## S25.2: Set a target-override from player click. Overrides card-eval target.
 ## target_id is the index of the target in sim.brotts.
 func set_target_override(target_id: int) -> void:
@@ -140,10 +147,48 @@ func evaluate(brott: RefCounted, enemy: RefCounted, match_time_sec: float) -> bo
 	## remain on disk for save-compat. See CUT block above enum Trigger.
 	## S25.3: Hardcoded baseline AI — card-eval loop removed.
 	
+	## S25.4: Empty context guard — no enemies available, no-op safely.
+	if _enemies_context.is_empty() and (enemy == null or not enemy.alive):
+		brott.target = null
+		movement_override = ""
+		return true
+	
 	if enemy == null or not enemy.alive:
 		## No live enemy — hold stance, no overrides
 		movement_override = ""
 		return true
+	
+	## S25.4: Multi-target priority selection.
+	## Override short-circuits above already handled player click-to-target.
+	## This cascade runs only when no active click override is set.
+	var alive_enemies: Array = _enemies_context.filter(func(e): return e != null and e.alive and e.hp > 0)
+	
+	if alive_enemies.is_empty():
+		## No live enemies in context — use passed `enemy` as fallback (1v1 compat)
+		if enemy != null and enemy.alive:
+			brott.target = enemy
+		else:
+			brott.target = null
+			movement_override = ""
+			return true
+	else:
+		## Priority cascade:
+		## 1. Melee-adjacent (within 48px) — pick closest melee-range attacker
+		var melee_enemies: Array = alive_enemies.filter(func(e): return brott.position.distance_to(e.position) < 48.0)
+		if not melee_enemies.is_empty():
+			melee_enemies.sort_custom(func(a, b_): return brott.position.distance_to(a.position) < brott.position.distance_to(b_.position))
+			brott.target = melee_enemies[0]
+		else:
+			## 2. Nearest; tie-break equidistant by lowest HP
+			var sorted_enemies: Array = alive_enemies.duplicate()
+			sorted_enemies.sort_custom(func(a, b_):
+				var da: float = brott.position.distance_to(a.position)
+				var db: float = brott.position.distance_to(b_.position)
+				if abs(da - db) < 1.0:  ## equidistant (within 1px epsilon)
+					return a.hp < b_.hp  ## tie-break: lower HP wins
+				return da < db  ## nearest wins
+			)
+			brott.target = sorted_enemies[0]
 	
 	var hp_pct: float = float(brott.hp) / float(brott.max_hp) if brott.max_hp > 0 else 1.0
 	

@@ -226,24 +226,34 @@ func _evaluate_brain(b: BrottState) -> void:
 	b._pending_gadget = ""
 	
 	if b.brain != null:
+		## S25.4: Populate enemies context for multi-target priority selection.
+		var enemy_list: Array = []
+		for other in brotts:
+			if other.team != b.team and other.alive:
+				enemy_list.append(other)
+		b.brain.set_enemies_context(enemy_list)
+		
 		var match_time_sec: float = float(tick_count) / float(TICKS_PER_SEC)
 		var enemy: BrottState = b.target
 		var fired: bool = b.brain.evaluate(b, enemy, match_time_sec)
 		
-		## S25.3: Target override from player click-to-target.
-		## Runs BEFORE priority re-pick so the override isn't silently overwritten.
-		if b.brain.movement_override == "target_override":
-			var oid: int = b.brain._override_target_id
-			if oid >= 0 and oid < brotts.size() and brotts[oid].alive:
-				b.target = brotts[oid]
-			else:
-				# Override target dead — clear override, fall through to normal re-pick
-				b.brain.clear_target_override()
-				if b.brain.target_priority != "nearest":
-					b.target = _find_target_by_priority(b, b.brain.target_priority)
-			# Either way, skip normal priority re-pick this tick
-		elif b.brain.target_priority != "nearest":
-			b.target = _find_target_by_priority(b, b.brain.target_priority)
+		## S25.4: Skip re-pick if brain already chose a valid living enemy target.
+		var brain_set_valid: bool = (b.target != null and is_instance_valid(b.target) and b.target.alive and b.target.team != b.team)
+		if not brain_set_valid:
+			## S25.3: Target override from player click-to-target.
+			## Runs BEFORE priority re-pick so the override isn't silently overwritten.
+			if b.brain.movement_override == "target_override":
+				var oid: int = b.brain._override_target_id
+				if oid >= 0 and oid < brotts.size() and brotts[oid].alive:
+					b.target = brotts[oid]
+				else:
+					# Override target dead — clear override, fall through to normal re-pick
+					b.brain.clear_target_override()
+					if b.brain.target_priority != "nearest":
+						b.target = _find_target_by_priority(b, b.brain.target_priority)
+				# Either way, skip normal priority re-pick this tick
+			elif b.brain.target_priority != "nearest":
+				b.target = _find_target_by_priority(b, b.brain.target_priority)
 		
 		# Handle pending gadget activation
 		if b._pending_gadget != "":

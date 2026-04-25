@@ -30,6 +30,8 @@ const LEAGUE_RANK: Dictionary = {
 	"platinum": 4,
 }
 
+## CUT: Arc G — league-era opponent templates. Replaced by ARCHETYPE_TEMPLATES for roguelike.
+## Retained for save-compat and batch test baseline. Do not delete before Arc G migration.
 # Template schema (§3.1 + S21.1 additions):
 #   id, name, archetype, tier, chassis, weapons, armor, modules, stance,
 #   unlock_league (S21.1), behavior_cards (S21.1; data-only, engine-ignored).
@@ -458,6 +460,148 @@ const TEMPLATES: Array[Dictionary] = [
 		],
 	},
 ]
+
+## ─────────────────────────────────────────────────────────────────────────
+## S25.4: Roguelike Encounter Archetype Pool
+## IDs locked: standard_duel | small_swarm | large_swarm | miniboss_escorts |
+##             counter_build_elite | glass_cannon_blitz | boss
+## ─────────────────────────────────────────────────────────────────────────
+
+## Baseline HP per tier — used to scale archetype hp_pct values.
+## Tier 1: battles 1-3, Tier 2: 4-7, Tier 3: 8-11, Tier 4: 12-14, Tier 5: Boss.
+static func _baseline_hp_for_tier(tier: int) -> int:
+	match tier:
+		1: return 80
+		2: return 120
+		3: return 160
+		4: return 200
+		_: return 240  # Boss tier
+
+## Archetype template records. enemy_specs describe the enemy composition.
+## hp_pct is relative to _baseline_hp_for_tier(tier) at generation time.
+const ARCHETYPE_TEMPLATES: Array[Dictionary] = [
+	{
+		"id": "standard_duel",
+		"display_name": "Standard Duel",
+		"enemy_specs": [
+			{"chassis": 0, "weapons": [4], "armor": 1, "modules": [], "hp_pct": 1.0, "count": 1}
+		]
+	},
+	{
+		"id": "small_swarm",
+		"display_name": "Small Swarm",
+		"enemy_specs": [
+			{"chassis": 0, "weapons": [4], "armor": 0, "modules": [], "hp_pct": 0.6, "count": 3}
+		]
+	},
+	{
+		"id": "large_swarm",
+		"display_name": "Large Swarm",
+		"enemy_specs": [
+			{"chassis": 0, "weapons": [4], "armor": 0, "modules": [], "hp_pct": 0.4, "count": 5}
+		]
+	},
+	{
+		"id": "miniboss_escorts",
+		"display_name": "Mini-boss + Escorts",
+		"enemy_specs": [
+			{"chassis": 2, "weapons": [0, 2], "armor": 3, "modules": [2], "hp_pct": 1.5, "count": 1},
+			{"chassis": 0, "weapons": [4], "armor": 0, "modules": [], "hp_pct": 0.7, "count": 2}
+		]
+	},
+	{
+		"id": "counter_build_elite",
+		"display_name": "Counter-Build Elite",
+		## enemy_specs populated dynamically by get_archetype_enemies() via build-read selector
+		"enemy_specs": []
+	},
+	{
+		"id": "glass_cannon_blitz",
+		"display_name": "Glass-Cannon Blitz",
+		"enemy_specs": [
+			{"chassis": 0, "weapons": [1, 0], "armor": 0, "modules": [], "hp_pct": 0.5, "count": 2}
+		]
+	},
+	{
+		"id": "boss",
+		"display_name": "IRONCLAD PRIME",
+		## Placeholder name — finalized in Arc H. S25.9 tunes AI.
+		"enemy_specs": [
+			{"chassis": 2, "weapons": [1, 0], "armor": 3, "modules": [2, 3, 5], "hp_pct": 2.0, "count": 1}
+		]
+	},
+]
+
+## Counter-Build Elite variant selector — reads player's RunState loadout.
+## Priority: modules ≥3 → anti_module; then primary weapon.
+static func _select_counter_build_variant(run_state) -> String:
+	if run_state == null:
+		return "anti_range"
+	var modules = run_state.equipped_modules if "equipped_modules" in run_state else []
+	if modules.size() >= 3:
+		return "anti_module"
+	var weapons = run_state.equipped_weapons if "equipped_weapons" in run_state else []
+	var primary: int = weapons[0] if weapons.size() > 0 else -1
+	if primary in [1, 3]:  # Railgun, Missile Pod
+		return "anti_range"
+	if primary in [2, 6]:  # Shotgun, Flak Cannon
+		return "anti_melee"
+	return "anti_range"
+
+## Concrete counter-build elite enemy specs per variant.
+static func _counter_build_specs(variant: String) -> Array[Dictionary]:
+	match variant:
+		"anti_range":
+			## Reactive Mesh + Rush build to close range quickly
+			return [{"chassis": 1, "weapons": [2, 0], "armor": 2, "modules": [4], "hp_pct": 1.3, "count": 1}]
+		"anti_melee":
+			## Railgun kiter to punish slow Shotgun users
+			return [{"chassis": 0, "weapons": [1], "armor": 1, "modules": [4, 3], "hp_pct": 1.3, "count": 1}]
+		"anti_module":
+			## EMP Charge + aggressive to shutdown active modules
+			return [{"chassis": 1, "weapons": [0, 4], "armor": 2, "modules": [5, 0], "hp_pct": 1.3, "count": 1}]
+		_:
+			return [{"chassis": 1, "weapons": [0], "armor": 1, "modules": [], "hp_pct": 1.3, "count": 1}]
+
+## Stub — returns the archetype id for a given battle. S25.6 completes.
+static func archetype_for(battle_index: int, last_archetype: String, _run_state) -> String:
+	return "standard_duel"  ## S25.6 implements full rotation + anti-repeat logic
+
+## Returns resolved enemy spawn specs for the given archetype + tier + player state.
+## Each returned dict: {chassis, weapons, armor, modules, hp} (hp is absolute, not pct).
+static func get_archetype_enemies(archetype_id: String, tier: int, run_state) -> Array[Dictionary]:
+	var template: Dictionary = {}
+	for t in ARCHETYPE_TEMPLATES:
+		if t["id"] == archetype_id:
+			template = t
+			break
+	if template.is_empty():
+		## Unknown archetype — fall back to standard_duel
+		return get_archetype_enemies("standard_duel", tier, run_state)
+	
+	var base_hp: int = _baseline_hp_for_tier(tier)
+	var specs: Array[Dictionary]
+	
+	if archetype_id == "counter_build_elite":
+		var variant := _select_counter_build_variant(run_state)
+		specs = _counter_build_specs(variant)
+	else:
+		specs = template["enemy_specs"].duplicate(true)
+	
+	## Expand count and compute absolute HP
+	var result: Array[Dictionary] = []
+	for spec in specs:
+		var count: int = spec.get("count", 1)
+		var hp: int = max(1, int(base_hp * float(spec["hp_pct"])))
+		for _i in range(count):
+			result.append({
+				"chassis": spec["chassis"],
+				"weapons": spec["weapons"].duplicate(),
+				"armor": spec["armor"],
+				"modules": spec["modules"].duplicate(),
+				"hp": hp,
+			})
+	return result
 
 ## §4.1 — maps (league, index) to a difficulty tier.
 ## S21.1: Bronze expanded to 5-slot curve [2,2,2,3,3] — tier-2 openers, tier-3 closers.

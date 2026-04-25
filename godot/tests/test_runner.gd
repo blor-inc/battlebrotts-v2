@@ -107,6 +107,7 @@ const SPRINT_TEST_FILES := [
 	"res://tests/test_s24_4_003_sfx_assets.gd",
 	"res://tests/test_s24_5_001_menu_loop_seam.gd",
 	"res://tests/test_s24_5_002_menu_music_routing.gd",
+	"res://tests/test_run_state_init.gd",
 ]
 
 var file_pass_count := 0

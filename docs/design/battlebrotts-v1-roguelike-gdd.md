@@ -55,25 +55,29 @@ Kites low-HP players. Fires EMP when player's modules are active. Engages aggres
 ---
 
 ### A.2 Run Difficulty Curve
-_Locked by HCD 2026-04-25 (expanded from v1 recommendation to incorporate encounter shapes)_
+_Locked by HCD 2026-04-25 (expanded from v1 recommendation to incorporate encounter shapes; further refined 2026-04-25 16:40 UTC: shape decoupled from difficulty)_
 
-**Decision:** 4 difficulty tiers spread across 15 battles. Each tier defines a **distribution of encounter archetypes** (see §A.9 for the full archetype library) — not just a template pool slice. Difficulty is a product of both opponent build tier AND encounter shape complexity.
+**Decision:** 4 difficulty tiers spread across 15 battles. **Difficulty (stats / loadout / AI quality) tracks tiers; encounter shape varies freely from Tier 1 onward.** Any archetype can appear in any tier as long as the constituent opponents are scaled to the tier's difficulty band. A Small Swarm in Tier 1 is just three *weak* bots; the shape doesn't carry the difficulty.
+
+**Refinement vs the v2 first pass (2026-04-25 16:40 UTC HCD note):** Earlier draft over-weighted Standard Duel in Tier 1 (80%) on the assumption that swarm shapes were inherently harder. They aren't — a swarm is only as hard as the bots in it. Shape variety is a player-experience lever; difficulty is a separate stat-and-AI lever. They should be tuned independently.
 
 | Battles | Tier | Encounter archetype distribution | Opponent loadout tier |
 |---------|------|----------------------------------|----------------------|
-| 1–3 | Tier 1 | 80% Standard Duel / 20% Small Swarm | Single-weapon, 0–1 modules |
-| 4–7 | Tier 2 | 50% Standard Duel / 25% Small Swarm / 15% Glass-Cannon Blitz / 10% Mini-boss+Escorts | Full weapon + armor + 1–2 modules |
-| 8–11 | Tier 3 | 20% Standard Duel / 30% Small Swarm / 20% Large Swarm / 20% Counter-Build Elite / 10% Mini-boss+Escorts | Full loadouts, counter-tuned |
-| 12–14 | Tier 4 | 10% Standard Duel / 20% Large Swarm / 30% Counter-Build Elite / 20% Mini-boss+Escorts / 20% Glass-Cannon Blitz | Silver-tier templates, Disruptor/Aegis/Chrono builds |
-| 15 | Boss | IRONCLAD PRIME (always) | Max loadout, hardcoded boss AI |
+| 1–3 | Tier 1 | Free shape mix (any archetype except Boss). Suggested seed: ~40% Standard Duel / ~25% Small Swarm / ~15% Glass-Cannon Blitz / ~10% Large Swarm / ~10% Mini-boss+Escorts | Single-weapon, 0–1 modules; opponents in swarms are individually weak |
+| 4–7 | Tier 2 | Free shape mix; ~30% Standard Duel / balance across other archetypes | Full weapon + armor + 1–2 modules |
+| 8–11 | Tier 3 | Free shape mix; introduce Counter-Build Elite | Full loadouts, counter-tuned |
+| 12–14 | Tier 4 | Free shape mix; weighted toward Counter-Build Elite + Large Swarm + Mini-boss+Escorts for climactic feel | Silver-tier templates, Disruptor/Aegis/Chrono builds |
+| 15 | Boss | IRONCLAD PRIME (always; name TBD) | Max loadout, hardcoded boss AI |
 
-**Key principle:** No stat inflation. Difficulty comes from harder opponent loadouts + encounter shape complexity. The balance invariant holds.
+The distributions above are *seeds* for the encounter generator, not hard quotas. Final tuning happens during Arc F + Arc H playtesting.
+
+**Key principle:** No stat inflation. Difficulty comes from opponent loadout strength + AI behavior quality + encounter density (a swarm of T2 bots is harder than a swarm of T1 bots, not because the *shape* changed but because the bots got stronger). The balance invariant holds.
 
 **Variety rule:** No two consecutive encounters may share the same archetype. State tracked on `RunState._last_encounter_archetype` (new field). If the archetype picker would repeat, re-roll once.
 
 **Run guarantee:** Each run guarantees at least one occurrence of: Small Swarm, Counter-Build Elite, and Mini-boss+Escorts (the three most tactically novel archetypes). Seeded into slots 5, 9, 12 at run generation, then shuffled within-tier constraints.
 
-**Multi-target implication:** The hardcoded baseline AI (§A.8) must handle swarm and escort encounters. Bot behavior in multi-target fights uses the priority system defined in §A.8.
+**Multi-target implication:** The hardcoded baseline AI (§A.8) must handle swarm and escort encounters from battle 1 onward. Bot behavior in multi-target fights uses the priority system defined in §A.8. Renderer must support multi-bot from Arc F's earliest sub-sprints, not as a Tier-3 add.
 
 ---
 
@@ -248,7 +252,7 @@ Encounters are no longer exclusively 1v1. Seven encounter archetypes form the sh
 **Format:** 1 vs 1  
 **Example composition:** Player Brott vs one opponent template (tier-matched)  
 **What makes it distinctive:** The baseline. No multi-target complexity. Pure 1v1 combat performance — loadout vs loadout, AI vs AI (with player click-to-target intervention).  
-**Design intent:** Establish baseline difficulty. Comfortable early on; by Tier 4, the Tier-4 opponent is a genuine threat even 1v1. Used in 80% of Tier 1 encounters so new players find their footing.
+**Design intent:** Establish baseline difficulty. Comfortable early on; by Tier 4, the Tier-4 opponent is a genuine threat even 1v1. Common but not dominant in Tier 1 — shape variety is an early-run lever, not just a late-run reward.
 
 ---
 
@@ -264,7 +268,7 @@ Encounters are no longer exclusively 1v1. Seven encounter archetypes form the sh
 **Format:** 1 vs 5–6  
 **Example composition:** Player vs 5 Micro-Scout-class bots, each at ~20% normal HP (individually trivial, collectively lethal if ignored)  
 **What makes it distinctive:** Pure chaos. The arena is full of bots. Click-to-target matters a lot here — the baseline AI will pick off bots one at a time; good targeting focuses the weakest cluster to prevent being surrounded. Audio is a stress test (lots of hit SFX). Visually overwhelming by design.  
-**Design intent:** Peak variety encounter. Short but intense. Should feel like a "holy shit" moment. Appears only in Tier 3+ to ensure players have enough HP/modules to survive the burst.
+**Design intent:** Peak variety encounter. Short but intense. Should feel like a "holy shit" moment. Can appear from Tier 1 onward; difficulty is governed by the per-bot loadout tier (a Tier-1 Large Swarm is six *very* weak bots), not by gating the shape itself.
 
 ---
 
